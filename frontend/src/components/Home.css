@@ -1,0 +1,135 @@
+.home-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  transition: background-color 0.2s ease;
+}
+
+.main-content {
+  flex: 1;
+  max-width: 600px;
+  border-right: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  margin-left: 275px;
+  background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.content-header {
+  position: sticky;
+  top: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  padding: 0;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+}
+
+[data-theme="light"] .content-header {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.content-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 16px;
+  line-height: 24px;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+.right-sidebar {
+  width: 350px;
+  padding: 4px 16px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.trends-widget {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  margin-top: 4px;
+}
+
+.trends-widget h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 12px 16px;
+}
+
+.trend-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.trend-item:hover {
+  background: var(--bg-hover);
+}
+
+.trend-category {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 16px;
+}
+
+.trend-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 2px 0;
+  line-height: 20px;
+}
+
+.trend-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 16px;
+}

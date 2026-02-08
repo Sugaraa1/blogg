@@ -1,0 +1,16 @@
+.notifications-content {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+}
+
+.notifications-content p {
+  margin: 10px 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.notifications-content p:first-child {
+  font-size: 48px;
+}
