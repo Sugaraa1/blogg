@@ -270,7 +270,7 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// Comment устгах (зөвхөн коментын зохиогч)
+// Comment устгах (комментын зохиогч ЭСВЭЛ постын эзэн)
 router.delete('/:id/comment/:commentId', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -285,8 +285,11 @@ router.delete('/:id/comment/:commentId', auth, async (req, res) => {
       return res.status(404).json({ message: 'Сэтгэгдэл олдсонгүй' });
     }
 
-    // Зөвхөн коментын зохиогч устгаж болно
-    if (comment.user.toString() !== req.userId) {
+    // Зөвхөн коментын зохиогч ЭСВЭЛ постын эзэн устгаж болно
+    const isCommentAuthor = comment.user.toString() === req.userId;
+    const isPostAuthor = post.author.toString() === req.userId;
+    
+    if (!isCommentAuthor && !isPostAuthor) {
       return res.status(403).json({ message: 'Энэ сэтгэгдлийг устгах эрхгүй байна' });
     }
 
@@ -294,6 +297,69 @@ router.delete('/:id/comment/:commentId', auth, async (req, res) => {
     await post.save();
     
     res.json({ message: 'Сэтгэгдэл устгасан' });
+  } catch (error) {
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
+
+// Comment like хийх
+router.post('/:id/comment/:commentId/like', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Пост олдсонгүй' });
+    }
+
+    const comment = post.comments.id(req.params.commentId);
+    
+    if (!comment) {
+      return res.status(404).json({ message: 'Сэтгэгдэл олдсонгүй' });
+    }
+
+    // Like toggle
+    const likeIndex = comment.likes.findIndex(id => id.toString() === req.userId);
+    
+    if (likeIndex > -1) {
+      comment.likes.splice(likeIndex, 1);
+    } else {
+      comment.likes.push(req.userId);
+    }
+
+    await post.save();
+    await post.populate('comments.user', 'username displayName avatar');
+    
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
+
+// Comment reply нэмэх
+router.post('/:id/comment/:commentId/reply', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Пост олдсонгүй' });
+    }
+
+    const comment = post.comments.id(req.params.commentId);
+    
+    if (!comment) {
+      return res.status(404).json({ message: 'Сэтгэгдэл олдсонгүй' });
+    }
+
+    comment.replies.push({
+      user: req.userId,
+      text: req.body.text
+    });
+
+    await post.save();
+    await post.populate('comments.user', 'username displayName avatar');
+    await post.populate('comments.replies.user', 'username displayName avatar');
+    
+    res.json(post);
   } catch (error) {
     res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
   }

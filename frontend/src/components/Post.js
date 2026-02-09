@@ -13,6 +13,9 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
   const [showViewers, setShowViewers] = useState(false);
   const [viewers, setViewers] = useState([]);
   const [isReposted, setIsReposted] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [showReplies, setShowReplies] = useState({});
 
   // Display original post if this is a repost
   const displayPost = post.repostedPost || post;
@@ -24,13 +27,11 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
   const displayViews = post.repostedPost ? (post.repostedPost.views || []) : views;
 
   useEffect(() => {
-    // Check if user has reposted (by seeing if this is their repost)
     if (post.repostedPost && String(post.author._id) === String(currentUser.id)) {
       setIsReposted(true);
     }
   }, [post._id, post.repostedPost, post.author._id, currentUser.id]);
 
-  // Record view when post is loaded
   useEffect(() => {
     const recordView = async () => {
       try {
@@ -91,11 +92,48 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
     }
   };
 
+  const handleCommentLike = async (commentId, e) => {
+    e.stopPropagation();
+    try {
+      const token = localStorage.getItem('token');
+      const postId = post.repostedPost ? post.repostedPost._id : post._id;
+      const response = await axios.post(
+        `http://localhost:5000/api/posts/${postId}/comment/${commentId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setComments(response.data.comments);
+    } catch (error) {
+      console.error('Comment like хийхэд алдаа:', error);
+    }
+  };
+
+  const handleReply = async (commentId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!replyText.trim()) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const postId = post.repostedPost ? post.repostedPost._id : post._id;
+      const response = await axios.post(
+        `http://localhost:5000/api/posts/${postId}/comment/${commentId}/reply`,
+        { text: replyText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setComments(response.data.comments);
+      setReplyText('');
+      setReplyingTo(null);
+      setShowReplies({ ...showReplies, [commentId]: true });
+    } catch (error) {
+      console.error('Reply хийхэд алдаа:', error);
+    }
+  };
+
   const handleRetweet = async (e) => {
     e.stopPropagation();
     try {
       const token = localStorage.getItem('token');
-      // Always repost the original post, not a repost
       const postToRepost = post.repostedPost ? post.repostedPost._id : post._id;
       const response = await axios.post(
         `http://localhost:5000/api/posts/${postToRepost}/repost`,
@@ -103,7 +141,6 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsReposted(response.data.reposted);
-      // Update retweets count from response
       if (response.data.post && response.data.post.retweets) {
         setRetweets(response.data.post.retweets);
       }
@@ -138,14 +175,14 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
     
     try {
       const token = localStorage.getItem('token');
-      const postIdToDelete = post.repostedPost ? post._id : post._id;
+      const postIdToDelete = post._id;
       await axios.delete(
         `http://localhost:5000/api/posts/${postIdToDelete}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       if (onPostUpdate) {
-        onPostUpdate(null); // Signal to remove post from display
+        onPostUpdate(null);
       }
     } catch (error) {
       console.error('Пост устгахад алдаа:', error);
@@ -212,9 +249,9 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
       </Link>
       
       <div className="post-body">
-        {isOwnRepost && (
+        {post.repostedPost && (
           <div className="repost-indicator">
-            <span>🔄 Та энэ постыг дахин бичлээ</span>
+            <span>🔄 {isOwnRepost ? 'Та энэ постыг дахин бичлээ' : `${post.author.displayName} дахин бичсэн`}</span>
           </div>
         )}
         <div className="post-header">
@@ -230,11 +267,11 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
             <span className="post-separator">·</span>
             <span className="post-time">{formatDate(displayPost.createdAt)}</span>
           </div>
-          {isOwnPost && (
+          {(isOwnPost || isOwnRepost) && (
             <button 
               className="delete-post-btn"
               onClick={handleDeletePost}
-              title="Постыг устгах"
+              title={isOwnRepost ? "Share-ээ устгах" : "Постыг устгах"}
             >
               ✕
             </button>
@@ -287,12 +324,6 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
           >
             <span className="action-icon">👁️</span>
             <span className="action-count">{displayViews.length}</span>
-          </button>
-          
-          <button 
-            className="action-btn share-btn"
-            onClick={(e) => e.stopPropagation()}
-          >
           </button>
         </div>
 
@@ -355,8 +386,8 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
             </form>
             
             <div className="comments-list">
-              {comments.map((comment, index) => (
-                <div key={index} className="comment">
+              {comments.map((comment) => (
+                <div key={comment._id} className="comment">
                   <Link 
                     to={`/profile/${comment.user?.username}`}
                     className="comment-avatar-link"
@@ -379,17 +410,107 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
                         <strong>{comment.user?.displayName}</strong>
                       </Link>
                       <span>@{comment.user?.username}</span>
-                      {comment.user?._id === currentUser.id && (
+                      {(comment.user?._id === currentUser.id || isOwnPost) && (
                         <button
                           className="delete-comment-btn"
                           onClick={(e) => handleDeleteComment(comment._id, e)}
-                          title="Сэтгэгдлийг устгах"
+                          title={comment.user?._id === currentUser.id ? "Сэтгэгдлийг устгах" : "Комментыг устгах (постын эзэн)"}
                         >
                           ✕
                         </button>
                       )}
                     </div>
                     <p>{comment.text}</p>
+                    
+                    {/* Comment actions */}
+                    <div className="comment-actions">
+                      <button
+                        className="comment-action-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReplyingTo(replyingTo === comment._id ? null : comment._id);
+                        }}
+                      >
+                        <span className="comment-action-icon">💬</span>
+                        <span className="comment-action-count">
+                          {comment.replies?.length || 0}
+                        </span>
+                      </button>
+                      
+                      <button
+                        className={`comment-action-btn ${comment.likes?.includes(currentUser.id) ? 'liked' : ''}`}
+                        onClick={(e) => handleCommentLike(comment._id, e)}
+                      >
+                        <span className="comment-action-icon">
+                          {comment.likes?.includes(currentUser.id) ? '❤️' : '🤍'}
+                        </span>
+                        <span className="comment-action-count">
+                          {comment.likes?.length || 0}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Reply form */}
+                    {replyingTo === comment._id && (
+                      <form 
+                        onSubmit={(e) => handleReply(comment._id, e)} 
+                        className="reply-form"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="text"
+                          placeholder={`@${comment.user?.username}-д хариулах...`}
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          autoFocus
+                        />
+                        <button type="submit" disabled={!replyText.trim()}>
+                          Илгээх
+                        </button>
+                      </form>
+                    )}
+
+                    {/* Replies list */}
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="replies-section">
+                        <button
+                          className="toggle-replies-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowReplies({
+                              ...showReplies,
+                              [comment._id]: !showReplies[comment._id]
+                            });
+                          }}
+                        >
+                          {showReplies[comment._id] ? '▼' : '▶'} {comment.replies.length} хариулт
+                        </button>
+                        
+                        {showReplies[comment._id] && (
+                          <div className="replies-list">
+                            {comment.replies.map((reply, idx) => (
+                              <div key={idx} className="reply-item">
+                                <div className="reply-avatar-small">
+                                  {reply.user?.avatar && reply.user.avatar.trim() !== '' ? (
+                                    <img src={reply.user.avatar} alt={reply.user.displayName} />
+                                  ) : (
+                                    reply.user?.displayName?.charAt(0).toUpperCase()
+                                  )}
+                                </div>
+                                <div className="reply-content">
+                                  <Link to={`/profile/${reply.user?.username}`}>
+                                    <strong>{reply.user?.displayName}</strong>
+                                  </Link>
+                                  <span className="reply-username">@{reply.user?.username}</span>
+                                  <p>{reply.text}</p>
+                                  <span className="reply-time">{formatDate(reply.createdAt)}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
