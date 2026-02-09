@@ -22,6 +22,13 @@
   font-size: 18px;
   font-weight: bold;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-avatar-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .post-form {

@@ -133,6 +133,11 @@
   margin-top: auto;
 }
 
+.user-profile-link {
+  text-decoration: none;
+  display: block;
+}
+
 .user-profile {
   display: flex;
   align-items: center;
@@ -159,6 +164,14 @@
   color: white;
   font-size: 18px;
   font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-details {

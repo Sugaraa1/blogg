@@ -20,6 +20,14 @@ function Sidebar({ user, onLogout }) {
     navigate('/login');
   };
 
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
+
+  // Avatar зураг шалгах - хоосон string эсвэл undefined
+  const hasAvatar = user.avatar && user.avatar.trim() !== '';
+
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
@@ -51,15 +59,21 @@ function Sidebar({ user, onLogout }) {
       </div>
 
       <div className="sidebar-footer">
-        <div className="user-profile">
-          <div className="user-avatar">
-            {user.displayName.charAt(0).toUpperCase()}
+        <Link to={`/profile/${user.username}`} className="user-profile-link">
+          <div className="user-profile">
+            <div className="user-avatar">
+              {hasAvatar ? (
+                <img src={user.avatar} alt={user.displayName} />
+              ) : (
+                getInitials(user.displayName)
+              )}
+            </div>
+            <div className="user-details">
+              <div className="user-name">{user.displayName}</div>
+              <div className="user-username">@{user.username}</div>
+            </div>
           </div>
-          <div className="user-details">
-            <div className="user-name">{user.displayName}</div>
-            <div className="user-username">@{user.username}</div>
-          </div>
-        </div>
+        </Link>
         <button className="logout-button" onClick={handleLogout}>
           🚪 Гарах
         </button>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Post.css';
 
@@ -8,7 +9,8 @@ function Post({ post, currentUser }) {
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
 
-  const handleLike = async () => {
+  const handleLike = async (e) => {
+    e.stopPropagation();
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
@@ -24,6 +26,7 @@ function Post({ post, currentUser }) {
 
   const handleComment = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!commentText.trim()) return;
 
     try {
@@ -59,14 +62,30 @@ function Post({ post, currentUser }) {
 
   return (
     <div className="post">
-      <div className="post-avatar">
-        {post.author?.displayName.charAt(0).toUpperCase()}
-      </div>
+      <Link 
+        to={`/profile/${post.author?.username}`} 
+        className="post-avatar-link"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="post-avatar">
+          {post.author?.avatar && post.author.avatar.trim() !== '' ? (
+            <img src={post.author.avatar} alt={post.author.displayName} />
+          ) : (
+            post.author?.displayName.charAt(0).toUpperCase()
+          )}
+        </div>
+      </Link>
       
       <div className="post-body">
         <div className="post-header">
           <div className="post-author-info">
-            <span className="author-name">{post.author?.displayName}</span>
+            <Link 
+              to={`/profile/${post.author?.username}`}
+              className="author-name"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {post.author?.displayName}
+            </Link>
             <span className="author-username">@{post.author?.username}</span>
             <span className="post-separator">·</span>
             <span className="post-time">{formatDate(post.createdAt)}</span>
@@ -79,14 +98,20 @@ function Post({ post, currentUser }) {
 
         <div className="post-actions">
           <button 
-            onClick={() => setShowComments(!showComments)} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowComments(!showComments);
+            }} 
             className="action-btn comment-btn"
           >
             <span className="action-icon">💬</span>
             <span className="action-count">{comments.length}</span>
           </button>
           
-          <button className="action-btn retweet-btn">
+          <button 
+            className="action-btn retweet-btn"
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className="action-icon">🔄</span>
             <span className="action-count">0</span>
           </button>
@@ -99,16 +124,23 @@ function Post({ post, currentUser }) {
             <span className="action-count">{likes.length}</span>
           </button>
           
-          <button className="action-btn share-btn">
+          <button 
+            className="action-btn share-btn"
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className="action-icon">📤</span>
           </button>
         </div>
 
         {showComments && (
-          <div className="comments-section">
+          <div className="comments-section" onClick={(e) => e.stopPropagation()}>
             <form onSubmit={handleComment} className="comment-form">
               <div className="comment-avatar-small">
-                {currentUser.displayName.charAt(0).toUpperCase()}
+                {currentUser.avatar && currentUser.avatar.trim() !== '' ? (
+                  <img src={currentUser.avatar} alt={currentUser.displayName} />
+                ) : (
+                  currentUser.displayName.charAt(0).toUpperCase()
+                )}
               </div>
               <input
                 type="text"
@@ -124,12 +156,27 @@ function Post({ post, currentUser }) {
             <div className="comments-list">
               {comments.map((comment, index) => (
                 <div key={index} className="comment">
-                  <div className="comment-avatar-small">
-                    {comment.user?.displayName.charAt(0).toUpperCase()}
-                  </div>
+                  <Link 
+                    to={`/profile/${comment.user?.username}`}
+                    className="comment-avatar-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="comment-avatar-small">
+                      {comment.user?.avatar && comment.user.avatar.trim() !== '' ? (
+                        <img src={comment.user.avatar} alt={comment.user.displayName} />
+                      ) : (
+                        comment.user?.displayName.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                  </Link>
                   <div className="comment-body">
                     <div className="comment-author">
-                      <strong>{comment.user?.displayName}</strong>
+                      <Link 
+                        to={`/profile/${comment.user?.username}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <strong>{comment.user?.displayName}</strong>
+                      </Link>
                       <span>@{comment.user?.username}</span>
                     </div>
                     <p>{comment.text}</p>

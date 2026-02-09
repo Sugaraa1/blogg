@@ -39,7 +39,9 @@ router.post('/register', async (req, res) => {
         id: user._id,
         username: user.username,
         displayName: user.displayName,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio
       }
     });
   } catch (error) {
@@ -75,7 +77,9 @@ router.post('/login', async (req, res) => {
         id: user._id,
         username: user.username,
         displayName: user.displayName,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio
       }
     });
   } catch (error) {

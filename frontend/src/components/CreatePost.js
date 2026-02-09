@@ -28,11 +28,23 @@ function CreatePost({ user, onPostCreated }) {
     setPosting(false);
   };
 
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
+
+  // Avatar зураг шалгах - хоосон string эсвэл undefined
+  const hasAvatar = user.avatar && user.avatar.trim() !== '';
+
   return (
     <div className="create-post">
       <div className="create-post-header">
         <div className="user-avatar-small">
-          {user.displayName.charAt(0).toUpperCase()}
+          {hasAvatar ? (
+            <img src={user.avatar} alt={user.displayName} />
+          ) : (
+            getInitials(user.displayName)
+          )}
         </div>
         <form onSubmit={handleSubmit} className="post-form">
           <textarea

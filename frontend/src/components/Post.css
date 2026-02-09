@@ -12,6 +12,11 @@
   background-color: var(--bg-hover);
 }
 
+.post-avatar-link {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
 .post-avatar {
   width: 40px;
   height: 40px;
@@ -24,6 +29,13 @@
   font-size: 18px;
   font-weight: bold;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.post-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .post-body {
@@ -47,6 +59,7 @@
   color: var(--text-primary);
   font-size: 15px;
   line-height: 20px;
+  text-decoration: none;
 }
 
 .author-name:hover {
@@ -174,6 +187,11 @@
   margin-bottom: 16px;
 }
 
+.comment-avatar-link {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
 .comment-avatar-small {
   width: 32px;
   height: 32px;
@@ -186,6 +204,13 @@
   font-size: 14px;
   font-weight: bold;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.comment-avatar-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .comment-form input {
@@ -251,6 +276,14 @@
   display: flex;
   gap: 4px;
   margin-bottom: 4px;
+}
+
+.comment-author a {
+  text-decoration: none;
+}
+
+.comment-author a:hover strong {
+  text-decoration: underline;
 }
 
 .comment-author strong {

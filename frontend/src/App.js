@@ -33,6 +33,12 @@ function App() {
     localStorage.removeItem('user');
   };
 
+  // User мэдээлэл шинэчлэх функц
+  const updateUser = (updatedUserData) => {
+    setUser(updatedUserData);
+    localStorage.setItem('user', JSON.stringify(updatedUserData));
+  };
+
   return (
     <ThemeProvider>
       <Router>
@@ -60,7 +66,7 @@ function App() {
             />
             <Route 
               path="/profile/:username" 
-              element={user ? <Profile user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+              element={user ? <Profile user={user} onLogout={handleLogout} updateUser={updateUser} /> : <Navigate to="/login" />} 
             />
           </Routes>
         </div>

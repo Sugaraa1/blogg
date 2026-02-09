@@ -23,11 +23,16 @@ const userSchema = new mongoose.Schema({
   },
   bio: {
     type: String,
-    default: ''
+    default: '',
+    maxlength: 160
   },
   avatar: {
     type: String,
-    default: 'default-avatar.png'
+    default: ''
+  },
+  coverImage: {
+    type: String,
+    default: ''
   },
   followers: [{
     type: mongoose.Schema.Types.ObjectId,
