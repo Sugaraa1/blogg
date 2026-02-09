@@ -2,7 +2,57 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User.js');
 const Post = require('../models/Post');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
+
+// Trending хэрэглэгчүүд авах (/:username-ээс өмнө)
+router.get('/trending', auth, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.userId);
+    
+    // Өөрийнхөө follow хийсэн хүмүүсийг除外して、статус хүмүүсийг авах
+    const users = await User.find({
+      _id: { 
+        $ne: req.userId,
+        $nin: currentUser.following
+      }
+    })
+      .select('username displayName avatar bio followers')
+      .sort({ 'followers': -1 })
+      .limit(20);
+    
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
+
+// Хэрэглэгч хайх
+router.get('/search', auth, async (req, res) => {
+  try {
+    const query = req.query.q || '';
+    const limit = parseInt(req.query.limit) || 50;
+
+    let findQuery = { _id: { $ne: req.userId } };
+    
+    // If there's a search query, apply filter
+    if (query.trim()) {
+      findQuery.$or = [
+        { username: { $regex: query, $options: 'i' } },
+        { displayName: { $regex: query, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(findQuery)
+      .select('_id username displayName avatar bio')
+      .limit(limit);
+
+    res.json(users);
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
 
 // Profile авах
 router.get('/:username', async (req, res) => {
@@ -34,6 +84,13 @@ router.get('/:username/posts', async (req, res) => {
     const posts = await Post.find({ author: user._id })
       .populate('author', 'username displayName avatar')
       .populate('comments.user', 'username displayName avatar')
+      .populate({
+        path: 'repostedPost',
+        populate: [
+          { path: 'author', select: 'username displayName avatar' },
+          { path: 'comments.user', select: 'username displayName avatar' }
+        ]
+      })
       .sort({ createdAt: -1 });
     
     res.json(posts);
@@ -100,6 +157,14 @@ router.post('/:id/follow', auth, async (req, res) => {
       
       await userToFollow.save();
       await currentUser.save();
+      
+      // Notification үүсгэх
+      await Notification.create({
+        recipient: req.params.id,
+        actor: req.userId,
+        type: 'follow',
+        message: `${currentUser.displayName} таню follow хийлээ`
+      });
       
       res.json({ message: 'Follow амжилттай', isFollowing: true });
     }

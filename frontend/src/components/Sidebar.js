@@ -1,5 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { ThemeContext } from '../context/ThemeContext';
 import './Sidebar.css';
 
@@ -7,13 +8,34 @@ function Sidebar({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const menuItems = [
     { path: '/', icon: '🏠', label: 'Home' },
     { path: '/explore', icon: '🔍', label: 'Explore' },
-    { path: '/notifications', icon: '🔔', label: 'Notifications' },
+    { path: '/notifications', icon: '🔔', label: 'Notifications', badge: unreadCount > 0 ? unreadCount : null },
     { path: `/profile/${user.username}`, icon: '👤', label: 'Profile' },
   ];
+
+  // Fetch unread notification count
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/notifications/count', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUnreadCount(response.data.unreadCount);
+    } catch (error) {
+      console.log('Unread count авах алдаа:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    // Refresh count every 10 seconds
+    const interval = setInterval(fetchUnreadCount, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     onLogout();
@@ -30,9 +52,10 @@ function Sidebar({ user, onLogout }) {
 
   return (
     <div className="sidebar">
-      <div className="sidebar-logo">
+      <Link to="/" className="sidebar-logo">
         <div className="logo-icon">🐦</div>
-      </div>
+        <div className="logo-text">Э-Блог</div>
+      </Link>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
@@ -41,13 +64,33 @@ function Sidebar({ user, onLogout }) {
             to={item.path}
             className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
           >
-            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-icon-wrapper">
+              <span className="nav-icon">{item.icon}</span>
+              {item.badge && <span className="notification-badge">{item.badge}</span>}
+            </span>
             <span className="nav-label">{item.label}</span>
           </Link>
         ))}
       </nav>
 
-      <button className="tweet-button">Пост</button>
+      <button 
+        className="tweet-button"
+        onClick={() => {
+          if (location.pathname === '/') {
+            // Scroll to post creation area
+            const element = document.getElementById('create-post-section');
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth' });
+              element.querySelector('textarea')?.focus();
+            }
+          } else {
+            // Navigate to home
+            navigate('/');
+          }
+        }}
+      >
+        Пост
+      </button>
 
       <div className="theme-toggle-container">
         <button className="theme-toggle" onClick={toggleTheme}>

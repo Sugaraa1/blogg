@@ -7,6 +7,8 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import Explore from './components/Explore';
 import Notifications from './components/Notifications';
+import PostDetail from './components/PostDetail';
+import Chat from './components/Chat';
 import './App.css';
 
 function App() {
@@ -57,6 +59,10 @@ function App() {
               element={user ? <Home user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
             />
             <Route 
+              path="/post/:postId" 
+              element={user ? <PostDetail user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+            />
+            <Route 
               path="/explore" 
               element={user ? <Explore user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
             />
@@ -69,6 +75,7 @@ function App() {
               element={user ? <Profile user={user} onLogout={handleLogout} updateUser={updateUser} /> : <Navigate to="/login" />} 
             />
           </Routes>
+          {user && <Chat currentUser={user} />}
         </div>
       </Router>
     </ThemeProvider>

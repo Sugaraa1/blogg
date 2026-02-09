@@ -13,24 +13,37 @@
 }
 
 .sidebar-logo {
-  padding: 4px 0;
-  margin-bottom: 4px;
-}
-
-.logo-icon {
-  font-size: 28px;
-  width: 50px;
-  height: 50px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  gap: 12px;
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  border-radius: 30px;
+  text-decoration: none;
+  color: inherit;
   transition: background-color 0.2s;
   cursor: pointer;
 }
 
-.logo-icon:hover {
+.sidebar-logo:hover {
   background-color: var(--bg-hover);
+}
+
+.logo-icon {
+  font-size: 28px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
 .sidebar-nav {
@@ -70,6 +83,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.nav-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #f4212e;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2px solid var(--bg-primary);
 }
 
 .nav-label {

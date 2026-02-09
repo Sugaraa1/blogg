@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import Post from './Post';
@@ -7,6 +7,7 @@ import './Profile.css';
 
 function Profile({ user, onLogout, updateUser }) {
   const { username } = useParams();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +19,9 @@ function Profile({ user, onLogout, updateUser }) {
   const [imageUrl, setImageUrl] = useState('');
   const [imageType, setImageType] = useState(''); // 'avatar' or 'cover'
   const [uploading, setUploading] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [followingStates, setFollowingStates] = useState({});
 
   const isOwnProfile = user.username === username;
 
@@ -66,6 +70,25 @@ function Profile({ user, onLogout, updateUser }) {
       setIsFollowing(response.data.isFollowing);
     } catch (error) {
       console.error('Follow статус шалгахад алдаа:', error);
+    }
+  };
+
+  const handleFollowFromModal = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `http://localhost:5000/api/users/${userId}/follow`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setFollowingStates(prev => ({
+        ...prev,
+        [userId]: response.data.isFollowing
+      }));
+      // Refresh profile to update counts
+      fetchProfile();
+    } catch (error) {
+      console.error('Follow хийхэд алдаа:', error);
     }
   };
 
@@ -240,6 +263,13 @@ function Profile({ user, onLogout, updateUser }) {
     return allComments;
   };
 
+  const handlePostUpdate = (updatedPost) => {
+    if (updatedPost === null) {
+      // Post was deleted, remove it from posts array
+      fetchUserPosts();
+    }
+  };
+
   if (loading) {
     return (
       <div className="home-layout">
@@ -355,11 +385,19 @@ function Profile({ user, onLogout, updateUser }) {
               )}
 
               <div className="profile-stats">
-                <div className="stat">
+                <div 
+                  className="stat clickable" 
+                  onClick={() => setShowFollowingModal(true)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <strong>{profile.following?.length || 0}</strong>
                   <span>Дагаж байгаа</span>
                 </div>
-                <div className="stat">
+                <div 
+                  className="stat clickable" 
+                  onClick={() => setShowFollowersModal(true)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <strong>{profile.followers?.length || 0}</strong>
                   <span>Дагагч</span>
                 </div>
@@ -393,7 +431,7 @@ function Profile({ user, onLogout, updateUser }) {
                   </div>
                 ) : (
                   posts.map(post => (
-                    <Post key={post._id} post={post} currentUser={user} />
+                    <Post key={post._id} post={post} currentUser={user} onPostUpdate={handlePostUpdate} />
                   ))
                 )}
               </div>
@@ -496,6 +534,116 @@ function Profile({ user, onLogout, updateUser }) {
                     </div>
                   )}
                 </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Followers Modal */}
+      {showFollowersModal && profile && (
+        <div className="modal-overlay" onClick={() => setShowFollowersModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Дагагчид</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowFollowersModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="users-list">
+              {profile.followers && profile.followers.length > 0 ? (
+                profile.followers.map(follower => (
+                  <div key={follower._id} className="user-list-item">
+                    <div 
+                      className="user-list-left"
+                      onClick={() => navigate(`/profile/${follower.username}`)}
+                    >
+                      {follower.avatar ? (
+                        <img 
+                          src={follower.avatar} 
+                          alt={follower.displayName}
+                          className="user-list-avatar"
+                        />
+                      ) : (
+                        <div className="user-list-avatar placeholder">
+                          {follower.displayName?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <div className="user-list-info">
+                        <p className="user-list-name">{follower.displayName || follower.username}</p>
+                        <p className="user-list-handle">@{follower.username}</p>
+                      </div>
+                    </div>
+                    {!isOwnProfile && follower._id !== user.id && (
+                      <button
+                        className={`follow-btn-small ${followingStates[follower._id] ? 'following' : ''}`}
+                        onClick={() => handleFollowFromModal(follower._id)}
+                      >
+                        {followingStates[follower._id] ? 'Дагаж байна' : 'Дагах'}
+                      </button>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="empty-list">Дагагч байхгүй байна</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Following Modal */}
+      {showFollowingModal && profile && (
+        <div className="modal-overlay" onClick={() => setShowFollowingModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Дагаж байгаа хүмүүс</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowFollowingModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="users-list">
+              {profile.following && profile.following.length > 0 ? (
+                profile.following.map(followee => (
+                  <div key={followee._id} className="user-list-item">
+                    <div 
+                      className="user-list-left"
+                      onClick={() => navigate(`/profile/${followee.username}`)}
+                    >
+                      {followee.avatar ? (
+                        <img 
+                          src={followee.avatar} 
+                          alt={followee.displayName}
+                          className="user-list-avatar"
+                        />
+                      ) : (
+                        <div className="user-list-avatar placeholder">
+                          {followee.displayName?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <div className="user-list-info">
+                        <p className="user-list-name">{followee.displayName || followee.username}</p>
+                        <p className="user-list-handle">@{followee.username}</p>
+                      </div>
+                    </div>
+                    {!isOwnProfile && followee._id !== user.id && (
+                      <button
+                        className={`follow-btn-small ${followingStates[followee._id] ? 'following' : ''}`}
+                        onClick={() => handleFollowFromModal(followee._id)}
+                      >
+                        {followingStates[followee._id] ? 'Дагаж байна' : 'Дагах'}
+                      </button>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="empty-list">Дагаж байгаа хүмүүс байхгүй байна</p>
               )}
             </div>
           </div>

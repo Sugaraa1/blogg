@@ -1,16 +1,143 @@
-.notifications-content {
-  padding: 40px 20px;
-  text-align: center;
-  color: var(--text-secondary);
-  background: var(--bg-primary);
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.notifications-content p {
-  margin: 10px 0;
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.notification-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.notification-item.unread {
+  background-color: var(--bg-secondary);
+}
+
+.notification-avatar-link {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.notification-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   font-size: 18px;
-  color: var(--text-primary);
+  font-weight: bold;
+  overflow: hidden;
 }
 
-.notifications-content p:first-child {
-  font-size: 48px;
+.notification-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.notification-actor-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.notification-actor-name:hover {
+  text-decoration: underline;
+}
+
+.notification-time {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.notification-message {
+  color: var(--text-primary);
+  font-size: 15px;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-icon {
+  font-size: 18px;
+}
+
+.notification-post-preview {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 8px 0 0 0;
+  padding: 8px;
+  background: var(--bg-primary);
+  border-left: 2px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.notification-unread-dot {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  font-size: 18px;
 }

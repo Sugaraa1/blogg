@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import Post from './Post';
@@ -8,6 +8,7 @@ import './Home.css';
 function Home({ user, onLogout }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [followingOnly, setFollowingOnly] = useState(false);
 
   const fetchPosts = async () => {
     try {
@@ -28,6 +29,13 @@ function Home({ user, onLogout }) {
     setPosts([newPost, ...posts]);
   };
 
+  const handlePostUpdate = (updatedPost) => {
+    if (updatedPost === null) {
+      // Post was deleted, trigger a refresh
+      fetchPosts();
+    }
+  };
+
   return (
     <div className="home-layout">
       <Sidebar user={user} onLogout={onLogout} />
@@ -37,8 +45,6 @@ function Home({ user, onLogout }) {
           <h2>Home</h2>
         </div>
         
-        <CreatePost user={user} onPostCreated={handleNewPost} />
-        
         {loading ? (
           <div className="loading-state">
             <div className="spinner"></div>
@@ -46,20 +52,31 @@ function Home({ user, onLogout }) {
           </div>
         ) : (
           <div className="posts-container">
-            {posts.length === 0 ? (
-              <div className="empty-state">
-                <p>🐦 Пост байхгүй байна. Эхний постоо бичээрэй!</p>
-              </div>
-            ) : (
-              posts.map(post => (
-                <Post key={post._id} post={post} currentUser={user} />
-              ))
-            )}
+            {(() => {
+              const displayed = followingOnly && user?.following && user.following.length > 0
+                ? posts.filter(p => user.following.map(String).includes(String(p.author?._id || p.author)))
+                : posts;
+
+              if (displayed.length === 0) {
+                return (
+                  <div className="empty-state">
+                    <p>🐦 Пост байхгүй байна. Эхний постоо бичээрэй!</p>
+                  </div>
+                );
+              }
+
+              return displayed.map(post => (
+                <Post key={post._id} post={post} currentUser={user} onPostUpdate={handlePostUpdate} />
+              ));
+            })()}
           </div>
         )}
       </div>
 
-      <div className="right-sidebar">
+      <div className="right-sidebar" id="create-post-section">
+        <div className="composer-widget">
+          <CreatePost user={user} onPostCreated={handleNewPost} />
+        </div>
         <div className="trends-widget">
           <h3>Trends</h3>
           <div className="trend-item">

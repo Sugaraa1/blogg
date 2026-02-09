@@ -19,6 +19,10 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  views: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   comments: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -32,6 +36,10 @@ const postSchema = new mongoose.Schema({
   }],
   image: {
     type: String
+  },
+  repostedPost: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
   },
   createdAt: {
     type: Date,
