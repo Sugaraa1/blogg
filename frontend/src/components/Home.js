@@ -77,7 +77,7 @@ function Home({ user, onLogout }) {
       
       <div className="main-content">
         <div className="content-header">
-          <h2>Home</h2>
+          <h2>Нүүр</h2>
         </div>
         
         {/* Filter Tabs */}

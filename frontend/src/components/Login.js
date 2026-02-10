@@ -25,7 +25,7 @@ function Login({ onLogin }) {
   return (
     <div className="auth-container">
       <div className="auth-box">
-        <h1>🐦 Блог системд нэвтрэх</h1>
+        <h1>🐦 Э-Блог системд нэвтрэх</h1>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <input
