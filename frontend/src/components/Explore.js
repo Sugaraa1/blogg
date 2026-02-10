@@ -4,58 +4,95 @@ import axios from 'axios';
 import Sidebar from './Sidebar';
 import './Explore.css';
 
-function Explore({ user, onLogout }) {
+function Explore({ user, onLogout, updateUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingMap, setFollowingMap] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchTrendingUsers = async () => {
+  const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/trending', {
+      // ✅ ШИНЭЧИЛСЭН: Бүх хэрэглэгчдийг авах
+      const response = await axios.get('http://localhost:5000/api/users/search?q=&limit=100', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
       
-      // Build following map
+      // ✅ Build following map - user.following array ашиглах
       const map = {};
+      const currentUserFollowing = user.following || [];
+      
       response.data.forEach(u => {
-        map[u._id] = u.followers?.some(f => f._id === user.id || f === user.id) || false;
+        // Дагаж байгаа эсэхийг шалгах
+        const isFollowing = currentUserFollowing.some(f => 
+          String(f._id || f) === String(u._id)
+        );
+        map[u._id] = isFollowing;
       });
+      
       setFollowingMap(map);
       setLoading(false);
     } catch (error) {
-      console.log('Trending users авах алдаа:', error);
+      console.log('Users авах алдаа:', error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTrendingUsers();
+    fetchAllUsers();
   }, []);
 
   const handleFollow = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
+      const response = await axios.post(
         `http://localhost:5000/api/users/${userId}/follow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      const isNowFollowing = !followingMap[userId];
+      const isNowFollowing = response.data.isFollowing;
+      
+      // ✅ Update following map instantly
       setFollowingMap(prev => ({
         ...prev,
         [userId]: isNowFollowing
       }));
-      fetchTrendingUsers();
+      
+      // ✅ Update local users array to show updated follower count
+      setUsers(prevUsers => 
+        prevUsers.map(u => {
+          if (u._id === userId) {
+            return {
+              ...u,
+              followers: isNowFollowing 
+                ? [...(u.followers || []), { _id: user.id }]
+                : (u.followers || []).filter(f => String(f._id || f) !== String(user.id))
+            };
+          }
+          return u;
+        })
+      );
+      
+      // ✅ Update App.js user state
+      if (updateUser) {
+        const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        updateUser({
+          ...user,
+          following: updatedUser.data.following,
+          followers: updatedUser.data.followers
+        });
+      }
     } catch (error) {
       console.error('Follow хийхэд алдаа:', error);
+      alert('Follow хийхэд алдаа гарлаа');
     }
   };
 
-  // ✅ БУЦААЖ ӨГСӨН - Follow хийсэн хүмүүс ч харагдана
+  // ✅ ШИНЭЧИЛСЭН: Өөрийгөө л хасах, бүх бусад хүмүүсийг харуулах
   const filteredUsers = users.filter(u => {
     // Зөвхөн өөрийгөө хасах
     if (u._id === user.id) return false;
@@ -95,7 +132,7 @@ function Explore({ user, onLogout }) {
         ) : (
           <div className="explore-container">
             <div className="explore-section">
-              <h3>🌟 {searchQuery ? 'Хайлтын үр дүн' : 'Хүмүүс'}</h3>
+              <h3>🌟 {searchQuery ? 'Хайлтын үр дүн' : 'Бүх хэрэглэгчид'}</h3>
               
               {filteredUsers.length === 0 ? (
                 <div className="empty-state">

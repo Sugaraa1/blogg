@@ -21,8 +21,8 @@
   gap: 12px;
   align-items: flex-start;
   width: 100%;
-  flex-direction: column;
 }
+
 
 .user-avatar-small {
   width: 40px;
@@ -167,3 +167,5 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+

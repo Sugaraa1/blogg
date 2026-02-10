@@ -8,6 +8,7 @@ function CreatePost({ user, onPostCreated }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [posting, setPosting] = useState(false);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (!imageFile) {
@@ -40,6 +41,11 @@ function CreatePost({ user, onPostCreated }) {
       onPostCreated(response.data);
       setContent('');
       setImageFile(null);
+      
+      // Focus back to textarea
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
     } catch (error) {
       console.error('Пост үүсгэхэд алдаа:', error);
       alert('Пост үүсгэхэд алдаа гарлаа. Дахин оролдоно уу.');
@@ -52,7 +58,6 @@ function CreatePost({ user, onPostCreated }) {
     return name.charAt(0).toUpperCase();
   };
 
-  // Avatar зураг шалгах - хоосон string эсвэл undefined
   const hasAvatar = user.avatar && user.avatar.trim() !== '';
 
   const triggerFilePicker = () => {
@@ -63,61 +68,87 @@ function CreatePost({ user, onPostCreated }) {
     setImageFile(null);
   };
 
+  // Character count styling
+  const getCharCountClass = () => {
+    if (content.length >= 280) return 'danger';
+    if (content.length >= 260) return 'warning';
+    return '';
+  };
+
   return (
     <div className="create-post">
-      <div className="create-post-header card">
-        <div className="user-avatar-small">
-          {hasAvatar ? (
-            <img src={user.avatar} alt={user.displayName} />
-          ) : (
-            getInitials(user.displayName)
-          )}
-        </div>
+      <div className="card">
+        <div className="create-post-header">
+          <div className="user-avatar-small">
+            {hasAvatar ? (
+              <img src={user.avatar} alt={user.displayName} />
+            ) : (
+              getInitials(user.displayName)
+            )}
+          </div>
 
-        <form onSubmit={handleSubmit} className="post-form">
-          <textarea
-            placeholder="Юу бодож байна?"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={280}
-            rows={3}
-          />
-
-          {previewUrl && (
-            <div className="image-preview">
-              <img src={previewUrl} alt="Preview" />
-              <button type="button" className="remove-image-btn" onClick={removeImage}>x</button>
-            </div>
-          )}
-
-          <div className="post-actions-row">
-            <input
-              ref={fileInputRef}
-              className="file-input-hidden"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files[0] || null)}
+          <form onSubmit={handleSubmit} className="post-form">
+            <textarea
+              ref={textareaRef}
+              placeholder="Юу бодож байна?"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              maxLength={280}
+              rows={1}
+              autoFocus
             />
 
-            <div className="left-actions">
-              <button type="button" className="file-icon-btn" onClick={triggerFilePicker} title="Зураг сонгох">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-              </button>
-              {imageFile && <span className="image-filename">{imageFile.name}</span>}
-            </div>
+            {previewUrl && (
+              <div className="image-preview">
+                <img src={previewUrl} alt="Preview" />
+                <button type="button" className="remove-image-btn" onClick={removeImage}>
+                  ✕
+                </button>
+              </div>
+            )}
 
-            <div className="right-actions">
-              <span className="char-count">{content.length}/280</span>
-              <button type="submit" disabled={(!content.trim() && !imageFile) || posting} className="submit-btn">
-                {posting ? 'Илгээж байна...' : 'Пост оруулах'}
-              </button>
+            <div className="post-actions-row">
+              <input
+                ref={fileInputRef}
+                className="file-input-hidden"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files[0] || null)}
+              />
+
+              <div className="left-actions">
+                <button 
+                  type="button" 
+                  className="file-icon-btn" 
+                  onClick={triggerFilePicker} 
+                  title="Зураг сонгох"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </button>
+                {imageFile && (
+                  <span className="image-filename">{imageFile.name}</span>
+                )}
+              </div>
+
+              <div className="right-actions">
+                <span className={`char-count ${getCharCountClass()}`}>
+                  {content.length}/280
+                </span>
+                <button 
+                  type="submit" 
+                  disabled={(!content.trim() && !imageFile) || posting || content.length > 280} 
+                  className="submit-btn"
+                >
+                  {posting ? 'Илгээж байна...' : 'Пост'}
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -64,7 +64,7 @@ function App() {
             />
             <Route 
               path="/explore" 
-              element={user ? <Explore user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+              element={user ? <Explore user={user} onLogout={handleLogout} updateUser={updateUser} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/notifications" 

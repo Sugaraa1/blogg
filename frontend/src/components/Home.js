@@ -35,7 +35,7 @@ function Home({ user, onLogout }) {
     }
   };
 
-  // 🆕 ЗАСВАРЛАСАН Filter logic
+  // ✅ ЗАСВАРЛАСАН Filter logic - өөрийн постыг хасах
   const getFilteredPosts = () => {
     if (!followingOnly) {
       return posts;
@@ -49,20 +49,23 @@ function Home({ user, onLogout }) {
       return [];
     }
     
-    // Follow хийсэн хүмүүсийн пост + өөрийнхөө пост харуулах
+    // ✅ Follow хийсэн хүмүүсийн пост (өөрийнхийг хасах)
     return posts.filter(post => {
       const authorId = post.author?._id || post.author;
-      // String болгож харьцуулах
       const authorIdStr = String(authorId);
       const userIdStr = String(user.id);
+      
+      // ✅ ӨӨРИЙН ПОСТЫГ ХАСАХ
+      if (authorIdStr === userIdStr) {
+        return false;
+      }
       
       // Following list дээр байгаа эсэх шалгах
       const isFollowing = followingIds.some(followId => 
         String(followId._id || followId) === authorIdStr
       );
       
-      // Өөрийн пост эсвэл follow хийсэн хүний пост
-      return isFollowing || authorIdStr === userIdStr;
+      return isFollowing;
     });
   };
 

@@ -11,10 +11,10 @@ function Sidebar({ user, onLogout }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const menuItems = [
-    { path: '/', icon: '🏠', label: 'Home' },
-    { path: '/explore', icon: '🔍', label: 'Explore' },
-    { path: '/notifications', icon: '🔔', label: 'Notifications', badge: unreadCount > 0 ? unreadCount : null },
-    { path: `/profile/${user.username}`, icon: '👤', label: 'Profile' },
+    { path: '/', icon: '🏠', label: 'Нүүр' },
+    { path: '/explore', icon: '🔍', label: 'Хэрэглэгч хайх' },
+    { path: '/notifications', icon: '🔔', label: 'Мэдэгдэл', badge: unreadCount > 0 ? unreadCount : null },
+    { path: `/profile/${user.username}`, icon: '👤', label: 'Профайл' },
   ];
 
   // Fetch unread notification count
@@ -96,7 +96,7 @@ function Sidebar({ user, onLogout }) {
         <button className="theme-toggle" onClick={toggleTheme}>
           <span className="theme-icon">{theme === 'light' ? '🌙' : '☀️'}</span>
           <span className="theme-label">
-            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+            {theme === 'dark' }
           </span>
         </button>
       </div>

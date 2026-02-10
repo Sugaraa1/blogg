@@ -3,11 +3,14 @@ import axios from 'axios';
 import './Chat.css';
 
 function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMessagesUpdate }) {
+  // ✅ Avatar URL helper - BASE64 болон http link-ийг зөв боловсруулах
   const getAvatarUrl = (avatar) => {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('data:image')) return avatar; // Base64
     return `http://localhost:5000${avatar}`;
   };
+
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -169,13 +172,30 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     <div className="chat-window">
       <div className="chat-window-header">
         <button className="back-btn" onClick={onBack}>←</button>
-        {getAvatarUrl(selectedUser.avatar) && (
-          <img 
-            src={getAvatarUrl(selectedUser.avatar)} 
-            alt={selectedUser.username}
-            className="header-avatar"
-          />
-        )}
+        {/* ✅ ЗАСВАРЛАСАН - Avatar харуулах */}
+        <div className="header-avatar">
+          {getAvatarUrl(selectedUser.avatar) ? (
+            <img 
+              src={getAvatarUrl(selectedUser.avatar)} 
+              alt={selectedUser.username}
+            />
+          ) : (
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              fontSize: '16px'
+            }}>
+              {selectedUser.displayName?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          )}
+        </div>
         <div className="chat-window-info">
           <h4>{selectedUser.displayName || selectedUser.username}</h4>
           <span className="chat-handle">@{selectedUser.username}</span>
@@ -193,31 +213,57 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
               key={msg._id}
               className={`message ${msg.sender._id === currentUser.id ? 'sent' : 'received'}`}
             >
-              {msg.sender._id !== currentUser.id && getAvatarUrl(msg.sender.avatar) && (
-                <img
-                  src={getAvatarUrl(msg.sender.avatar)}
-                  alt={msg.sender.username}
-                  className="message-avatar"
-                />
+              {/* ✅ ЗАСВАРЛАСАН - Received message avatar */}
+              {msg.sender._id !== currentUser.id && (
+                getAvatarUrl(msg.sender.avatar) ? (
+                  <img
+                    src={getAvatarUrl(msg.sender.avatar)}
+                    alt={msg.sender.username}
+                    className="message-avatar"
+                  />
+                ) : (
+                  <div className="message-avatar" style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}>
+                    {msg.sender.displayName?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )
               )}
-              {msg.sender._id !== currentUser.id && !getAvatarUrl(msg.sender.avatar) && (
-                <div className="message-avatar placeholder" />
-              )}
+              
               <div className="message-content">
                 {msg.image && (
                   <img src={`http://localhost:5000${msg.image}`} alt="Message" className="message-image" />
                 )}
                 {msg.content && <p>{msg.content}</p>}
               </div>
-              {msg.sender._id === currentUser.id && getAvatarUrl(currentUser.avatar) && (
-                <img
-                  src={getAvatarUrl(currentUser.avatar)}
-                  alt={currentUser.username}
-                  className="message-avatar"
-                />
-              )}
-              {msg.sender._id === currentUser.id && !getAvatarUrl(currentUser.avatar) && (
-                <div className="message-avatar placeholder" />
+              
+              {/* ✅ ЗАСВАРЛАСАН - Sent message avatar */}
+              {msg.sender._id === currentUser.id && (
+                getAvatarUrl(currentUser.avatar) ? (
+                  <img
+                    src={getAvatarUrl(currentUser.avatar)}
+                    alt={currentUser.username}
+                    className="message-avatar"
+                  />
+                ) : (
+                  <div className="message-avatar" style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}>
+                    {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )
               )}
             </div>
           ))
