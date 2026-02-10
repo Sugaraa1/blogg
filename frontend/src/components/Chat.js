@@ -16,7 +16,14 @@ function Chat({ currentUser, onlineUsers = [] }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Initialize socket connection
+  // 🆕 Avatar URL helper function
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return null;
+    if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('data:image')) return avatar; // Base64
+    return `http://localhost:5000${avatar}`;
+  };
+
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io('http://localhost:5000');
@@ -29,7 +36,6 @@ function Chat({ currentUser, onlineUsers = [] }) {
 
     socket.on('receive_message', (data) => {
       if (selectedUser?.id === data.sender) {
-        // Message is from the selected conversation
         const markAsRead = async () => {
           try {
             const token = localStorage.getItem('token');
@@ -94,12 +100,11 @@ function Chat({ currentUser, onlineUsers = [] }) {
       const response = await axios.get('http://localhost:5000/api/users/search?q=', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Filter out current user
       const filtered = response.data.filter(u => u._id !== currentUser.id);
       setAllUsers(filtered);
     } catch (error) {
       console.error('Error fetching users:', error);
-      alert('Хэрэглэгч ачаалахад бүтэлгүйтлээ');
+      alert('Хэрэглэгч ачаалахад алдаа гарлаа');
     }
   };
 
@@ -206,11 +211,26 @@ function Chat({ currentUser, onlineUsers = [] }) {
                         className="user-item"
                         onClick={() => handleStartNewMessage(user)}
                       >
-                        <img 
-                          src={`http://localhost:5000${user.avatar}`}
-                          alt={user.username}
-                          className="user-avatar"
-                        />
+                        {/* 🆕 ЗАСВАРЛАСАН Avatar */}
+                        {getAvatarUrl(user.avatar) ? (
+                          <img 
+                            src={getAvatarUrl(user.avatar)}
+                            alt={user.username}
+                            className="user-avatar"
+                          />
+                        ) : (
+                          <div className="user-avatar" style={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            fontSize: '16px'
+                          }}>
+                            {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                        )}
                         <div className="user-info">
                           <h5>{user.displayName || user.username}</h5>
                           <p>@{user.username}</p>

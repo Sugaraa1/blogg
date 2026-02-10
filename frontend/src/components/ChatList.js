@@ -4,6 +4,7 @@ function ChatList({ conversations, onSelectUser, onlineUsers = [] }) {
   const getAvatarUrl = (avatar) => {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('data:image')) return avatar; // Base64
     return `http://localhost:5000${avatar}`;
   };
 
@@ -16,19 +17,19 @@ function ChatList({ conversations, onSelectUser, onlineUsers = [] }) {
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
 
-      if (diffMins < 1) return 'сейчас';
+      if (diffMins < 1) return 'Одоо';
       if (diffMins < 60) return `${diffMins}м`;
-      if (diffHours < 24) return `${diffHours}ч`;
-      if (diffDays < 7) return `${diffDays}д`;
+      if (diffHours < 24) return `${diffHours}ц`;
+      if (diffDays < 7) return `${diffDays}ө`;
       
-      return d.toLocaleDateString();
+      return d.toLocaleDateString('mn-MN');
     } catch {
       return '';
     }
   };
 
   const truncateText = (text, length = 30) => {
-    if (!text) return 'No message';
+    if (!text) return 'Мессеж байхгүй';
     return text.length > length ? text.substring(0, length) + '...' : text;
   };
 

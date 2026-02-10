@@ -60,8 +60,8 @@ router.get('/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username })
       .select('-password')
       .populate('followers', 'username displayName avatar')
-      .populate('following', 'username displayName avatar');
-    
+      .populate('following', '_id username displayName avatar'); // 🆕 _id нэмсэн
+
     if (!user) {
       return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
     }

@@ -93,20 +93,31 @@ function Profile({ user, onLogout, updateUser }) {
   };
 
   const handleFollow = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:5000/api/users/${profile._id}/follow`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setIsFollowing(response.data.isFollowing);
-      fetchProfile();
-    } catch (error) {
-      console.error('Follow хийхэд алдаа:', error);
-      alert('Follow хийхэд алдаа гарлаа');
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `http://localhost:5000/api/users/${profile._id}/follow`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setIsFollowing(response.data.isFollowing);
+    
+    // 🆕 App.js-ийн user state шинэчлэх
+    if (updateUser && user.id !== profile._id) {
+      const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`);
+      updateUser({
+        ...user,
+        following: updatedUser.data.following,
+        followers: updatedUser.data.followers
+      });
     }
-  };
+    
+    fetchProfile();
+  } catch (error) {
+    console.error('Follow хийхэд алдаа:', error);
+    alert('Follow хийхэд алдаа гарлаа');
+  }
+};
 
   const handleSaveBio = async () => {
     try {

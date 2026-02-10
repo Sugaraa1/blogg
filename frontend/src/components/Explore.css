@@ -190,3 +190,15 @@
   color: var(--text-secondary);
   font-size: 18px;
 }
+
+.user-stats {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.user-followers,
+.user-following {
+  font-weight: 600;
+  color: var(--text-primary);
+}

@@ -55,13 +55,18 @@ function Explore({ user, onLogout }) {
     }
   };
 
-  // Real-time search filter (exclude current user)
-  const filteredUsers = users.filter(u =>
-    u._id !== user.id && (
+  // ✅ БУЦААЖ ӨГСӨН - Follow хийсэн хүмүүс ч харагдана
+  const filteredUsers = users.filter(u => {
+    // Зөвхөн өөрийгөө хасах
+    if (u._id === user.id) return false;
+    
+    // Search query шүүлт
+    const matchesSearch = 
       u.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.username.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+      u.username.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   return (
     <div className="home-layout">
@@ -90,11 +95,16 @@ function Explore({ user, onLogout }) {
         ) : (
           <div className="explore-container">
             <div className="explore-section">
-              <h3>🌟 {searchQuery ? 'Хайлтын үр дүн' : 'Хамгийн сайн хүмүүс'}</h3>
+              <h3>🌟 {searchQuery ? 'Хайлтын үр дүн' : 'Хүмүүс'}</h3>
               
               {filteredUsers.length === 0 ? (
                 <div className="empty-state">
-                  <p>{searchQuery ? 'Хэрэглэгч олдсонгүй' : 'Хэрэглэгч байхгүй байна'}</p>
+                  <p>
+                    {searchQuery 
+                      ? 'Хэрэглэгч олдсонгүй' 
+                      : 'Хэрэглэгч байхгүй байна'
+                    }
+                  </p>
                 </div>
               ) : (
                 <div className="users-grid">
@@ -115,20 +125,20 @@ function Explore({ user, onLogout }) {
                           <h4>{u.displayName}</h4>
                           <p>@{u.username}</p>
                           <p className="user-bio">{u.bio || 'Био байхгүй'}</p>
-                          <p className="user-followers">
-                            {u.followers?.length || 0} follow эрхүүлэгч
+                          <p className="user-stats">
+                            <span className="user-followers">{u.followers?.length || 0} дагагч</span>
+                            {' · '}
+                            <span className="user-following">{u.following?.length || 0} дагаж байна</span>
                           </p>
                         </div>
                       </Link>
                       
-                      {u._id !== user.id && (
-                        <button
-                          className={`follow-btn ${followingMap[u._id] ? 'following' : ''}`}
-                          onClick={() => handleFollow(u._id)}
-                        >
-                          {followingMap[u._id] ? 'Following' : 'Follow'}
-                        </button>
-                      )}
+                      <button
+                        className={`follow-btn ${followingMap[u._id] ? 'following' : ''}`}
+                        onClick={() => handleFollow(u._id)}
+                      >
+                        {followingMap[u._id] ? 'Дагаж байна' : 'Дагах'}
+                      </button>
                     </div>
                   ))}
                 </div>
