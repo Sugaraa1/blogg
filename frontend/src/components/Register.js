@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 
-function Register({ onLogin }) {
+function Register() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -11,16 +12,26 @@ function Register({ onLogin }) {
     displayName: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       const response = await axios.post('http://localhost:5000/api/auth/register', formData);
-      onLogin(response.data.user, response.data.token);
+      
+      // Verification page руу шилжүүлэх
+      navigate('/verify-email', { 
+        state: { 
+          email: formData.email,
+          message: response.data.message 
+        } 
+      });
     } catch (err) {
       setError(err.response?.data?.message || 'Бүртгэл үүсгэхэд алдаа гарлаа');
+      setLoading(false);
     }
   };
 
@@ -53,12 +64,15 @@ function Register({ onLogin }) {
           />
           <input
             type="password"
-            placeholder="Нууц үг"
+            placeholder="Нууц үг (дор хаяж 6 тэмдэгт)"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
+            minLength={6}
           />
-          <button type="submit">Бүртгүүлэх</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Бүртгэж байна...' : 'Бүртгүүлэх'}
+          </button>
         </form>
         <p>
           Бүртгэлтэй юу? <Link to="/login">Нэвтрэх</Link>

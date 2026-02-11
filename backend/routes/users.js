@@ -10,14 +10,13 @@ router.get('/trending', auth, async (req, res) => {
   try {
     const currentUser = await User.findById(req.userId);
     
-    // Өөрийнхөө follow хийсэн хүмүүсийг除外して、статус хүмүүсийг авах
     const users = await User.find({
       _id: { 
         $ne: req.userId,
         $nin: currentUser.following
       }
     })
-      .select('username displayName avatar bio followers')
+      .select('username displayName avatar bio followers following') // 🆕 following нэмсэн
       .sort({ 'followers': -1 })
       .limit(20);
     
@@ -27,7 +26,7 @@ router.get('/trending', auth, async (req, res) => {
   }
 });
 
-// Хэрэглэгч хайх
+// 🆕 ЗАСВАРЛАСАН - followers болон following field нэмсэн
 router.get('/search', auth, async (req, res) => {
   try {
     const query = req.query.q || '';
@@ -35,7 +34,6 @@ router.get('/search', auth, async (req, res) => {
 
     let findQuery = { _id: { $ne: req.userId } };
     
-    // If there's a search query, apply filter
     if (query.trim()) {
       findQuery.$or = [
         { username: { $regex: query, $options: 'i' } },
@@ -44,7 +42,7 @@ router.get('/search', auth, async (req, res) => {
     }
 
     const users = await User.find(findQuery)
-      .select('_id username displayName avatar bio')
+      .select('_id username displayName avatar bio followers following') // 🆕 ЗАСВАРЛАСАН
       .limit(limit);
 
     res.json(users);
@@ -60,7 +58,7 @@ router.get('/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username })
       .select('-password')
       .populate('followers', 'username displayName avatar')
-      .populate('following', '_id username displayName avatar'); // 🆕 _id нэмсэн
+      .populate('following', '_id username displayName avatar');
 
     if (!user) {
       return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });

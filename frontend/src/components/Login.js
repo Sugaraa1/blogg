@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 
 function Login({ onLogin }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -18,6 +19,17 @@ function Login({ onLogin }) {
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
       onLogin(response.data.user, response.data.token);
     } catch (err) {
+      // И-мэйл баталгаажаагүй бол verification page руу шилжүүлэх
+      if (err.response?.data?.emailNotVerified) {
+        navigate('/verify-email', { 
+          state: { 
+            email: err.response.data.email,
+            message: err.response.data.message 
+          } 
+        });
+        return;
+      }
+      
       setError(err.response?.data?.message || 'Нэвтрэх явцад алдаа гарлаа');
     }
   };

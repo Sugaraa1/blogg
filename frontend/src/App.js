@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './context/ThemeContext';
 import Login from './components/Login';
 import Register from './components/Register';
+import EmailVerification from './components/EmailVerification'; // 🆕 IMPORT нэмэх
 import Home from './components/Home';
 import Profile from './components/Profile';
 import Explore from './components/Explore';
@@ -35,7 +36,6 @@ function App() {
     localStorage.removeItem('user');
   };
 
-  // User мэдээлэл шинэчлэх функц
   const updateUser = (updatedUserData) => {
     setUser(updatedUserData);
     localStorage.setItem('user', JSON.stringify(updatedUserData));
@@ -52,7 +52,12 @@ function App() {
             />
             <Route 
               path="/register" 
-              element={user ? <Navigate to="/" /> : <Register onLogin={handleLogin} />} 
+              element={user ? <Navigate to="/" /> : <Register />} 
+            />
+            {/* 🆕 ЭНД НЭМЭХ - Email Verification Route */}
+            <Route 
+              path="/verify-email" 
+              element={user ? <Navigate to="/" /> : <EmailVerification onVerified={handleLogin} />} 
             />
             <Route 
               path="/" 
