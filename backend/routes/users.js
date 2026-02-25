@@ -5,6 +5,66 @@ const Post = require('../models/Post');
 const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 
+// 🆕 Block хийх
+router.post('/:id/block', auth, async (req, res) => {
+  try {
+    if (req.params.id === req.userId) {
+      return res.status(400).json({ message: 'Өөрийгөө block хийж болохгүй' });
+    }
+
+    const userToBlock = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.userId);
+
+    if (!userToBlock) {
+      return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
+    }
+
+    const isBlocked = currentUser.blockedUsers.includes(req.params.id);
+
+    if (isBlocked) {
+      // Unblock хийх
+      currentUser.blockedUsers = currentUser.blockedUsers.filter(
+        id => id.toString() !== req.params.id
+      );
+      
+      await currentUser.save();
+      
+      res.json({ message: 'Unblock амжилттай', isBlocked: false });
+    } else {
+      // Block хийх
+      currentUser.blockedUsers.push(req.params.id);
+      
+      // Block хийхэд автоматаар unfollow хийгдэнэ
+      currentUser.following = currentUser.following.filter(
+        id => id.toString() !== req.params.id
+      );
+      userToBlock.followers = userToBlock.followers.filter(
+        id => id.toString() !== req.userId
+      );
+      
+      await currentUser.save();
+      await userToBlock.save();
+      
+      res.json({ message: 'Block амжилттай', isBlocked: true });
+    }
+  } catch (error) {
+    console.error('Block хийхэд алдаа:', error);
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
+
+// 🆕 Block статус шалгах
+router.get('/:id/block-status', auth, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.userId);
+    const isBlocked = currentUser.blockedUsers.includes(req.params.id);
+    
+    res.json({ isBlocked });
+  } catch (error) {
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
+
 // Trending хэрэглэгчүүд авах (/:username-ээс өмнө)
 router.get('/trending', auth, async (req, res) => {
   try {
@@ -16,7 +76,7 @@ router.get('/trending', auth, async (req, res) => {
         $nin: currentUser.following
       }
     })
-      .select('username displayName avatar bio followers following') // 🆕 following нэмсэн
+      .select('username displayName avatar bio followers following')
       .sort({ 'followers': -1 })
       .limit(20);
     
@@ -26,7 +86,6 @@ router.get('/trending', auth, async (req, res) => {
   }
 });
 
-// 🆕 ЗАСВАРЛАСАН - followers болон following field нэмсэн
 router.get('/search', auth, async (req, res) => {
   try {
     const query = req.query.q || '';
@@ -42,7 +101,7 @@ router.get('/search', auth, async (req, res) => {
     }
 
     const users = await User.find(findQuery)
-      .select('_id username displayName avatar bio followers following') // 🆕 ЗАСВАРЛАСАН
+      .select('_id username displayName avatar bio followers following')
       .limit(limit);
 
     res.json(users);
@@ -136,7 +195,6 @@ router.post('/:id/follow', auth, async (req, res) => {
     const isFollowing = currentUser.following.includes(req.params.id);
 
     if (isFollowing) {
-      // Unfollow хийх
       userToFollow.followers = userToFollow.followers.filter(
         id => id.toString() !== req.userId
       );
@@ -149,19 +207,17 @@ router.post('/:id/follow', auth, async (req, res) => {
       
       res.json({ message: 'Unfollow амжилттай', isFollowing: false });
     } else {
-      // Follow хийх
       userToFollow.followers.push(req.userId);
       currentUser.following.push(req.params.id);
       
       await userToFollow.save();
       await currentUser.save();
       
-      // Notification үүсгэх
       await Notification.create({
         recipient: req.params.id,
         actor: req.userId,
         type: 'follow',
-        message: `${currentUser.displayName} таню follow хийлээ`
+        message: `${currentUser.displayName} таны follow хийлээ`
       });
       
       res.json({ message: 'Follow амжилттай', isFollowing: true });

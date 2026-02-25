@@ -42,7 +42,29 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-  // 🆕 И-мэйл баталгаажуулалт
+  // 🆕 Block list - блоклосон хэрэглэгчид
+  blockedUsers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  // 🆕 Ban system
+  isBanned: {
+    type: Boolean,
+    default: false
+  },
+  banReason: {
+    type: String,
+    default: null
+  },
+  bannedUntil: {
+    type: Date,
+    default: null
+  },
+  reportCount: {
+    type: Number,
+    default: 0
+  },
+  // И-мэйл баталгаажуулалт
   emailVerified: {
     type: Boolean,
     default: false

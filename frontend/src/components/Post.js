@@ -153,20 +153,33 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
   };
 
   const handleViewersClick = async (e) => {
-    e.stopPropagation();
-    try {
-      const token = localStorage.getItem('token');
-      const postId = post.repostedPost ? post.repostedPost._id : post._id;
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}/viewers`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setViewers(response.data);
-      setShowViewers(true);
-    } catch (error) {
-      console.error('Хүмүүсийг авахад алдаа:', error);
-    }
-  };
+  e.stopPropagation();
+  try {
+    const token = localStorage.getItem('token');
+    const postId = post.repostedPost ? post.repostedPost._id : post._id;
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}/viewers`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    // ✅ Давхардсан хэрэглэгчдийг арилгах
+    const uniqueViewers = [];
+    const seenIds = new Set();
+    
+    response.data.forEach(viewer => {
+      const viewerId = viewer._id;
+      if (!seenIds.has(viewerId)) {
+        seenIds.add(viewerId);
+        uniqueViewers.push(viewer);
+      }
+    });
+    
+    setViewers(uniqueViewers);
+    setShowViewers(true);
+  } catch (error) {
+    console.error('Хүмүүсийг авахад алдаа:', error);
+  }
+};
 
   const handleDeletePost = async () => {
     if (!window.confirm('Энэ постыг устгахуу үнэхээр сайн уу?')) {

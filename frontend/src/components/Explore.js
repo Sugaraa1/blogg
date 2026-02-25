@@ -9,22 +9,33 @@ function Explore({ user, onLogout, updateUser }) {
   const [loading, setLoading] = useState(true);
   const [followingMap, setFollowingMap] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [blockedUsers, setBlockedUsers] = useState([]); // 🆕 Blocked users
+
+  // 🆕 Blocked users авах
+  const fetchBlockedUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBlockedUsers(response.data.blockedUsers || []);
+    } catch (error) {
+      console.error('Blocked users авахад алдаа:', error);
+    }
+  };
 
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      // ✅ ШИНЭЧИЛСЭН: Бүх хэрэглэгчдийг авах
       const response = await axios.get('http://localhost:5000/api/users/search?q=&limit=100', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
       
-      // ✅ Build following map - user.following array ашиглах
       const map = {};
       const currentUserFollowing = user.following || [];
       
       response.data.forEach(u => {
-        // Дагаж байгаа эсэхийг шалгах
         const isFollowing = currentUserFollowing.some(f => 
           String(f._id || f) === String(u._id)
         );
@@ -41,6 +52,7 @@ function Explore({ user, onLogout, updateUser }) {
 
   useEffect(() => {
     fetchAllUsers();
+    fetchBlockedUsers(); // 🆕 Blocked users авах
   }, []);
 
   const handleFollow = async (userId) => {
@@ -54,13 +66,11 @@ function Explore({ user, onLogout, updateUser }) {
       
       const isNowFollowing = response.data.isFollowing;
       
-      // ✅ Update following map instantly
       setFollowingMap(prev => ({
         ...prev,
         [userId]: isNowFollowing
       }));
       
-      // ✅ Update local users array to show updated follower count
       setUsers(prevUsers => 
         prevUsers.map(u => {
           if (u._id === userId) {
@@ -75,7 +85,6 @@ function Explore({ user, onLogout, updateUser }) {
         })
       );
       
-      // ✅ Update App.js user state
       if (updateUser) {
         const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -92,10 +101,16 @@ function Explore({ user, onLogout, updateUser }) {
     }
   };
 
-  // ✅ ШИНЭЧИЛСЭН: Өөрийгөө л хасах, бүх бусад хүмүүсийг харуулах
+  // ✅ ЗАСВАРЛАСАН: Өөрийгөө болон blocked users-ийг хасах
   const filteredUsers = users.filter(u => {
-    // Зөвхөн өөрийгөө хасах
+    // Өөрийгөө хасах
     if (u._id === user.id) return false;
+    
+    // 🆕 Blocked users хасах
+    const isBlocked = blockedUsers.some(blockedId => 
+      String(blockedId._id || blockedId) === String(u._id)
+    );
+    if (isBlocked) return false;
     
     // Search query шүүлт
     const matchesSearch = 

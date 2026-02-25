@@ -47,6 +47,7 @@ app.use('/api/posts', require('./routes/posts'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/reports', require('./routes/reports')); // 🆕 Reports route
 
 // File upload endpoint
 const auth = require('./middleware/auth');
@@ -62,7 +63,7 @@ app.post('/api/upload', auth, upload.single('file'), (req, res) => {
 });
 
 // Socket.io for real-time messaging
-const userSockets = new Map(); // Map userId to socket id
+const userSockets = new Map();
 
 io.on('connection', (socket) => {
   socket.on('user_connected', (userId) => {

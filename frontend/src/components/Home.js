@@ -9,6 +9,20 @@ function Home({ user, onLogout }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingOnly, setFollowingOnly] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState([]); // 🆕 Blocked users list
+
+  // 🆕 Blocked users авах
+  const fetchBlockedUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBlockedUsers(response.data.blockedUsers || []);
+    } catch (error) {
+      console.error('Blocked users авахад алдаа:', error);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -23,6 +37,7 @@ function Home({ user, onLogout }) {
 
   useEffect(() => {
     fetchPosts();
+    fetchBlockedUsers(); // 🆕 Blocked users авах
   }, []);
 
   const handleNewPost = (newPost) => {
@@ -35,38 +50,47 @@ function Home({ user, onLogout }) {
     }
   };
 
-  // ✅ ЗАСВАРЛАСАН Filter logic - өөрийн постыг хасах
+  // ✅ ЗАСВАРЛАСАН Filter logic - blocked users болон өөрийн постыг хасах
   const getFilteredPosts = () => {
-    if (!followingOnly) {
-      return posts;
-    }
-    
-    // User-ийн following array авах
-    const followingIds = user.following || [];
-    
-    // Following list хоосон бол хоосон array буцаана
-    if (followingIds.length === 0) {
-      return [];
-    }
-    
-    // ✅ Follow хийсэн хүмүүсийн пост (өөрийнхийг хасах)
-    return posts.filter(post => {
+    let filtered = posts;
+
+    // 🆕 BLOCKED USERS-ийн постыг хасах
+    filtered = filtered.filter(post => {
       const authorId = post.author?._id || post.author;
-      const authorIdStr = String(authorId);
-      const userIdStr = String(user.id);
+      const isBlocked = blockedUsers.some(blockedId => 
+        String(blockedId._id || blockedId) === String(authorId)
+      );
+      return !isBlocked; // Blocked хэрэглэгчийн пост харуулахгүй
+    });
+
+    // Following filter
+    if (followingOnly) {
+      const followingIds = user.following || [];
       
-      // ✅ ӨӨРИЙН ПОСТЫГ ХАСАХ
-      if (authorIdStr === userIdStr) {
-        return false;
+      if (followingIds.length === 0) {
+        return [];
       }
       
-      // Following list дээр байгаа эсэх шалгах
-      const isFollowing = followingIds.some(followId => 
-        String(followId._id || followId) === authorIdStr
-      );
-      
-      return isFollowing;
-    });
+      filtered = filtered.filter(post => {
+        const authorId = post.author?._id || post.author;
+        const authorIdStr = String(authorId);
+        const userIdStr = String(user.id);
+        
+        // Өөрийн постыг хасах
+        if (authorIdStr === userIdStr) {
+          return false;
+        }
+        
+        // Following list дээр байгаа эсэх шалгах
+        const isFollowing = followingIds.some(followId => 
+          String(followId._id || followId) === authorIdStr
+        );
+        
+        return isFollowing;
+      });
+    }
+
+    return filtered;
   };
 
   const filteredPosts = getFilteredPosts();

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import Post from './Post';
+import ProfileActions from './ProfileActions'; // 🆕 НЭМСЭН
 import './Profile.css';
 
 function Profile({ user, onLogout, updateUser }) {
@@ -12,15 +13,17 @@ function Profile({ user, onLogout, updateUser }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false); // 🆕 НЭМСЭН
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({ bio: '' });
   const [activeTab, setActiveTab] = useState('posts');
   const [showImageModal, setShowImageModal] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
-  const [imageType, setImageType] = useState(''); // 'avatar' or 'cover'
+  const [imageType, setImageType] = useState('');
   const [uploading, setUploading] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [showBlockedModal, setShowBlockedModal] = useState(false); 
   const [followingStates, setFollowingStates] = useState({});
 
   const isOwnProfile = user.username === username;
@@ -33,6 +36,7 @@ function Profile({ user, onLogout, updateUser }) {
   useEffect(() => {
     if (profile && !isOwnProfile) {
       checkFollowStatus();
+      checkBlockStatus(); // 🆕 НЭМСЭН
     }
   }, [profile, isOwnProfile]);
 
@@ -73,6 +77,39 @@ function Profile({ user, onLogout, updateUser }) {
     }
   };
 
+  // 🆕 НЭМСЭН - Block статус шалгах
+  const checkBlockStatus = async () => {
+    if (!profile) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:5000/api/users/${profile._id}/block-status`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsBlocked(response.data.isBlocked);
+    } catch (error) {
+      console.error('Block статус шалгахад алдаа:', error);
+    }
+  };
+
+  // 🆕 НЭМСЭН - Block хийх
+  const handleBlock = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `http://localhost:5000/api/users/${profile._id}/block`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsBlocked(response.data.isBlocked);
+      alert(response.data.message);
+      fetchProfile();
+    } catch (error) {
+      console.error('Block хийхэд алдаа:', error);
+      alert('Block хийхэд алдаа гарлаа');
+    }
+  };
+
   const handleFollowFromModal = async (userId) => {
     try {
       const token = localStorage.getItem('token');
@@ -85,7 +122,6 @@ function Profile({ user, onLogout, updateUser }) {
         ...prev,
         [userId]: response.data.isFollowing
       }));
-      // Refresh profile to update counts
       fetchProfile();
     } catch (error) {
       console.error('Follow хийхэд алдаа:', error);
@@ -93,31 +129,30 @@ function Profile({ user, onLogout, updateUser }) {
   };
 
   const handleFollow = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await axios.post(
-      `http://localhost:5000/api/users/${profile._id}/follow`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setIsFollowing(response.data.isFollowing);
-    
-    // 🆕 App.js-ийн user state шинэчлэх
-    if (updateUser && user.id !== profile._id) {
-      const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`);
-      updateUser({
-        ...user,
-        following: updatedUser.data.following,
-        followers: updatedUser.data.followers
-      });
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `http://localhost:5000/api/users/${profile._id}/follow`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsFollowing(response.data.isFollowing);
+      
+      if (updateUser && user.id !== profile._id) {
+        const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`);
+        updateUser({
+          ...user,
+          following: updatedUser.data.following,
+          followers: updatedUser.data.followers
+        });
+      }
+      
+      fetchProfile();
+    } catch (error) {
+      console.error('Follow хийхэд алдаа:', error);
+      alert('Follow хийхэд алдаа гарлаа');
     }
-    
-    fetchProfile();
-  } catch (error) {
-    console.error('Follow хийхэд алдаа:', error);
-    alert('Follow хийхэд алдаа гарлаа');
-  }
-};
+  };
 
   const handleSaveBio = async () => {
     try {
@@ -130,7 +165,6 @@ function Profile({ user, onLogout, updateUser }) {
       setProfile(response.data);
       setEditMode(false);
       
-      // App.js-ийн user state шинэчлэх
       if (updateUser && isOwnProfile) {
         updateUser({
           ...user,
@@ -155,7 +189,6 @@ function Profile({ user, onLogout, updateUser }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Зургийн хэмжээ шалгах (5MB-аас бага байх ёстой)
     if (file.size > 5 * 1024 * 1024) {
       alert('Зургийн хэмжээ 5MB-аас бага байх ёстой');
       return;
@@ -163,7 +196,6 @@ function Profile({ user, onLogout, updateUser }) {
 
     setUploading(true);
 
-    // File-ийг base64 болгох
     const reader = new FileReader();
     reader.onloadend = async () => {
       const base64String = reader.result;
@@ -184,7 +216,6 @@ function Profile({ user, onLogout, updateUser }) {
         setShowImageModal(false);
         setUploading(false);
         
-        // App.js-ийн user state шинэчлэх
         if (updateUser && isOwnProfile) {
           updateUser({
             ...user,
@@ -233,7 +264,6 @@ function Profile({ user, onLogout, updateUser }) {
       setShowImageModal(false);
       setUploading(false);
       
-      // App.js-ийн user state шинэчлэх
       if (updateUser && isOwnProfile) {
         updateUser({
           ...user,
@@ -276,7 +306,6 @@ function Profile({ user, onLogout, updateUser }) {
 
   const handlePostUpdate = (updatedPost) => {
     if (updatedPost === null) {
-      // Post was deleted, remove it from posts array
       fetchUserPosts();
     }
   };
@@ -318,7 +347,6 @@ function Profile({ user, onLogout, updateUser }) {
         </div>
         
         <div className="profile-container">
-          {/* Нүүр зураг */}
           <div className="profile-cover">
             {profile.coverImage ? (
               <img src={profile.coverImage} alt="Cover" />
@@ -336,7 +364,6 @@ function Profile({ user, onLogout, updateUser }) {
             )}
           </div>
 
-          {/* Profile мэдээлэл */}
           <div className="profile-info-section">
             <div className="profile-avatar-container">
               {profile.avatar ? (
@@ -366,12 +393,22 @@ function Profile({ user, onLogout, updateUser }) {
                   {editMode ? 'Болих' : 'Profile засах'}
                 </button>
               ) : (
-                <button 
-                  className={`follow-btn ${isFollowing ? 'following' : ''}`}
-                  onClick={handleFollow}
-                >
-                  {isFollowing ? 'Дагаж байна' : 'Дагах'}
-                </button>
+                <>
+                  <button 
+                    className={`follow-btn ${isFollowing ? 'following' : ''}`}
+                    onClick={handleFollow}
+                  >
+                    {isFollowing ? 'Дагаж байна' : 'Дагах'}
+                  </button>
+                  {/* 🆕 НЭМСЭН - Block болон Report товчнууд follow хажууд */}
+                  <ProfileActions
+                    profileUser={profile}
+                    currentUser={user}
+                    isBlocked={isBlocked}
+                    onBlock={handleBlock}
+                    onReport={() => fetchProfile()}
+                  />
+                </>
               )}
             </div>
 
@@ -412,11 +449,20 @@ function Profile({ user, onLogout, updateUser }) {
                   <strong>{profile.followers?.length || 0}</strong>
                   <span>Дагагч</span>
                 </div>
+                {isOwnProfile && (
+                  <div 
+                    className="stat clickable" 
+                    onClick={() => setShowBlockedModal(true)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <strong>{profile.blockedUsers?.length || 0}</strong>
+                    <span>Blocked</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="profile-tabs">
             <button
               className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
@@ -432,7 +478,6 @@ function Profile({ user, onLogout, updateUser }) {
             </button>
           </div>
 
-          {/* Content */}
           <div className="profile-content">
             {activeTab === 'posts' && (
               <div className="posts-list">
@@ -473,7 +518,6 @@ function Profile({ user, onLogout, updateUser }) {
         </div>
       </div>
 
-      {/* Image Upload Modal */}
       {showImageModal && (
         <div className="modal-overlay" onClick={() => !uploading && setShowImageModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -551,7 +595,6 @@ function Profile({ user, onLogout, updateUser }) {
         </div>
       )}
 
-      {/* Followers Modal */}
       {showFollowersModal && profile && (
         <div className="modal-overlay" onClick={() => setShowFollowersModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -606,7 +649,6 @@ function Profile({ user, onLogout, updateUser }) {
         </div>
       )}
 
-      {/* Following Modal */}
       {showFollowingModal && profile && (
         <div className="modal-overlay" onClick={() => setShowFollowingModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -660,8 +702,75 @@ function Profile({ user, onLogout, updateUser }) {
           </div>
         </div>
       )}
+    {/* 🆕 Blocked Users Modal */}
+      {showBlockedModal && profile && isOwnProfile && (
+        <div className="modal-overlay" onClick={() => setShowBlockedModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Blocked хэрэглэгчид</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowBlockedModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="users-list">
+              {profile.blockedUsers && profile.blockedUsers.length > 0 ? (
+                profile.blockedUsers.map(blockedUser => (
+                  <div key={blockedUser._id} className="user-list-item">
+                    <div 
+                      className="user-list-left"
+                      onClick={() => navigate(`/profile/${blockedUser.username}`)}
+                    >
+                      {blockedUser.avatar ? (
+                        <img 
+                          src={blockedUser.avatar} 
+                          alt={blockedUser.displayName}
+                          className="user-list-avatar"
+                        />
+                      ) : (
+                        <div className="user-list-avatar placeholder">
+                          {blockedUser.displayName?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <div className="user-list-info">
+                        <p className="user-list-name">{blockedUser.displayName || blockedUser.username}</p>
+                        <p className="user-list-handle">@{blockedUser.username}</p>
+                      </div>
+                    </div>
+                    <button
+                      className="unblock-btn-small"
+                      onClick={async () => {
+                        try {
+                          const token = localStorage.getItem('token');
+                          await axios.post(
+                            `http://localhost:5000/api/users/${blockedUser._id}/block`,
+                            {},
+                            { headers: { Authorization: `Bearer ${token}` } }
+                          );
+                          fetchProfile();
+                        } catch (error) {
+                          console.error('Unblock хийхэд алдаа:', error);
+                        }
+                      }}
+                    >
+                      Unblock
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="empty-list">Blocked хэрэглэгч байхгүй байна</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+    
+    
   );
 }
+
 
 export default Profile;
