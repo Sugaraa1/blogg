@@ -1,0 +1,38 @@
+.unblock-btn-small {
+  padding: 6px 16px;
+  background: transparent;
+  color: #10b981;
+  border: 1.5px solid #10b981;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.unblock-btn-small:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #059669;
+  color: #059669;
+  transform: translateY(-1px);
+}
+
+.unblock-btn-small:active {
+  transform: translateY(0);
+}
+
+.empty-list {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+}
+
+.empty-list p {
+  margin: 0;
+  line-height: 1.5;
+}

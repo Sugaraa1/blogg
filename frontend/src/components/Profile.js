@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import Post from './Post';
-import ProfileActions from './ProfileActions'; // 🆕 НЭМСЭН
+import ProfileActions from './ProfileActions';
 import './Profile.css';
 
 function Profile({ user, onLogout, updateUser }) {
@@ -13,7 +13,7 @@ function Profile({ user, onLogout, updateUser }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false); // 🆕 НЭМСЭН
+  const [isBlocked, setIsBlocked] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({ bio: '' });
   const [activeTab, setActiveTab] = useState('posts');
@@ -36,13 +36,16 @@ function Profile({ user, onLogout, updateUser }) {
   useEffect(() => {
     if (profile && !isOwnProfile) {
       checkFollowStatus();
-      checkBlockStatus(); // 🆕 НЭМСЭН
+      checkBlockStatus();
     }
   }, [profile, isOwnProfile]);
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/users/${username}`);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/users/${username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setProfile(response.data);
       setEditData({
         bio: response.data.bio || ''
@@ -77,7 +80,6 @@ function Profile({ user, onLogout, updateUser }) {
     }
   };
 
-  // 🆕 НЭМСЭН - Block статус шалгах
   const checkBlockStatus = async () => {
     if (!profile) return;
     try {
@@ -92,8 +94,12 @@ function Profile({ user, onLogout, updateUser }) {
     }
   };
 
-  // 🆕 НЭМСЭН - Block хийх
   const handleBlock = async () => {
+    const action = isBlocked ? 'unblock' : 'block';
+    if (!window.confirm(`Та энэ хэрэглэгчийг ${action} хийх үү?`)) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
@@ -103,10 +109,10 @@ function Profile({ user, onLogout, updateUser }) {
       );
       setIsBlocked(response.data.isBlocked);
       alert(response.data.message);
-      fetchProfile();
+      await fetchProfile();
     } catch (error) {
       console.error('Block хийхэд алдаа:', error);
-      alert('Block хийхэд алдаа гарлаа');
+      alert(error.response?.data?.message || 'Block хийхэд алдаа гарлаа');
     }
   };
 
@@ -400,7 +406,6 @@ function Profile({ user, onLogout, updateUser }) {
                   >
                     {isFollowing ? 'Дагаж байна' : 'Дагах'}
                   </button>
-                  {/* 🆕 НЭМСЭН - Block болон Report товчнууд follow хажууд */}
                   <ProfileActions
                     profileUser={profile}
                     currentUser={user}
@@ -613,7 +618,10 @@ function Profile({ user, onLogout, updateUser }) {
                   <div key={follower._id} className="user-list-item">
                     <div 
                       className="user-list-left"
-                      onClick={() => navigate(`/profile/${follower.username}`)}
+                      onClick={() => {
+                        navigate(`/profile/${follower.username}`);
+                        setShowFollowersModal(false);
+                      }}
                     >
                       {follower.avatar ? (
                         <img 
@@ -667,7 +675,10 @@ function Profile({ user, onLogout, updateUser }) {
                   <div key={followee._id} className="user-list-item">
                     <div 
                       className="user-list-left"
-                      onClick={() => navigate(`/profile/${followee.username}`)}
+                      onClick={() => {
+                        navigate(`/profile/${followee.username}`);
+                        setShowFollowingModal(false);
+                      }}
                     >
                       {followee.avatar ? (
                         <img 
@@ -702,7 +713,8 @@ function Profile({ user, onLogout, updateUser }) {
           </div>
         </div>
       )}
-    {/* 🆕 Blocked Users Modal */}
+
+      {/* ✅ ЗАСВАРЛАСАН Blocked Users Modal */}
       {showBlockedModal && profile && isOwnProfile && (
         <div className="modal-overlay" onClick={() => setShowBlockedModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -717,60 +729,86 @@ function Profile({ user, onLogout, updateUser }) {
             </div>
             <div className="users-list">
               {profile.blockedUsers && profile.blockedUsers.length > 0 ? (
-                profile.blockedUsers.map(blockedUser => (
-                  <div key={blockedUser._id} className="user-list-item">
-                    <div 
-                      className="user-list-left"
-                      onClick={() => navigate(`/profile/${blockedUser.username}`)}
-                    >
-                      {blockedUser.avatar ? (
-                        <img 
-                          src={blockedUser.avatar} 
-                          alt={blockedUser.displayName}
-                          className="user-list-avatar"
-                        />
-                      ) : (
-                        <div className="user-list-avatar placeholder">
-                          {blockedUser.displayName?.[0]?.toUpperCase() || 'U'}
+                profile.blockedUsers.map(blockedUser => {
+                  // Handle both populated and non-populated blocked users
+                  const userId = blockedUser._id || blockedUser;
+                  const userObj = typeof blockedUser === 'object' ? blockedUser : null;
+                  
+                  return (
+                    <div key={userId} className="user-list-item">
+                      <div 
+                        className="user-list-left"
+                        onClick={() => {
+                          if (userObj?.username) {
+                            navigate(`/profile/${userObj.username}`);
+                            setShowBlockedModal(false);
+                          }
+                        }}
+                        style={{ cursor: userObj?.username ? 'pointer' : 'default' }}
+                      >
+                        {userObj?.avatar ? (
+                          <img 
+                            src={userObj.avatar} 
+                            alt={userObj.displayName}
+                            className="user-list-avatar"
+                          />
+                        ) : (
+                          <div className="user-list-avatar placeholder">
+                            {userObj?.displayName?.[0]?.toUpperCase() || ''}
+                          </div>
+                        )}
+                        <div className="user-list-info">
+                          <p className="user-list-name">
+                            {userObj?.displayName || userObj?.username || 'Хэрэглэгч'}
+                          </p>
+                          <p className="user-list-handle">
+                            @{userObj?.username || 'unknown'}
+                          </p>
                         </div>
-                      )}
-                      <div className="user-list-info">
-                        <p className="user-list-name">{blockedUser.displayName || blockedUser.username}</p>
-                        <p className="user-list-handle">@{blockedUser.username}</p>
                       </div>
+                      <button
+                        className="unblock-btn-small"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (!window.confirm('Энэ хэрэглэгчийг unblock хийх үү?')) {
+                            return;
+                          }
+                          
+                          try {
+                            const token = localStorage.getItem('token');
+                            const response = await axios.post(
+                              `http://localhost:5000/api/users/${userId}/block`,
+                              {},
+                              { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                            alert(response.data.message || 'Unblock амжилттай!');
+                            // Refresh profile to update blocked list
+                            await fetchProfile();
+                          } catch (error) {
+                            console.error('Unblock хийхэд алдаа:', error);
+                            alert(error.response?.data?.message || 'Unblock хийхэд алдаа гарлаа');
+                          }
+                        }}
+                      >
+                        Unblock
+                      </button>
                     </div>
-                    <button
-                      className="unblock-btn-small"
-                      onClick={async () => {
-                        try {
-                          const token = localStorage.getItem('token');
-                          await axios.post(
-                            `http://localhost:5000/api/users/${blockedUser._id}/block`,
-                            {},
-                            { headers: { Authorization: `Bearer ${token}` } }
-                          );
-                          fetchProfile();
-                        } catch (error) {
-                          console.error('Unblock хийхэд алдаа:', error);
-                        }
-                      }}
-                    >
-                      Unblock
-                    </button>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <p className="empty-list">Blocked хэрэглэгч байхгүй байна</p>
+                <div className="empty-list">
+                  <p style={{ fontSize: '18px', marginBottom: '8px' }}>Blocked хэрэглэгч байхгүй байна</p>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+                    Та хэрэглэгчийн profile дээрээс Block товч дарж block хийж болно
+                  </p>
+                </div>
               )}
             </div>
           </div>
         </div>
       )}
     </div>
-    
-    
   );
 }
-
 
 export default Profile;

@@ -3,15 +3,15 @@ import axios from 'axios';
 import Sidebar from './Sidebar';
 import Post from './Post';
 import CreatePost from './CreatePost';
+import Statistics from './Statistics'; // ✅ НЭМСЭН
 import './Home.css';
 
 function Home({ user, onLogout }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingOnly, setFollowingOnly] = useState(false);
-  const [blockedUsers, setBlockedUsers] = useState([]); // 🆕 Blocked users list
+  const [blockedUsers, setBlockedUsers] = useState([]);
 
-  // 🆕 Blocked users авах
   const fetchBlockedUsers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -37,7 +37,7 @@ function Home({ user, onLogout }) {
 
   useEffect(() => {
     fetchPosts();
-    fetchBlockedUsers(); // 🆕 Blocked users авах
+    fetchBlockedUsers();
   }, []);
 
   const handleNewPost = (newPost) => {
@@ -50,20 +50,17 @@ function Home({ user, onLogout }) {
     }
   };
 
-  // ✅ ЗАСВАРЛАСАН Filter logic - blocked users болон өөрийн постыг хасах
   const getFilteredPosts = () => {
     let filtered = posts;
 
-    // 🆕 BLOCKED USERS-ийн постыг хасах
     filtered = filtered.filter(post => {
       const authorId = post.author?._id || post.author;
       const isBlocked = blockedUsers.some(blockedId => 
         String(blockedId._id || blockedId) === String(authorId)
       );
-      return !isBlocked; // Blocked хэрэглэгчийн пост харуулахгүй
+      return !isBlocked;
     });
 
-    // Following filter
     if (followingOnly) {
       const followingIds = user.following || [];
       
@@ -76,12 +73,10 @@ function Home({ user, onLogout }) {
         const authorIdStr = String(authorId);
         const userIdStr = String(user.id);
         
-        // Өөрийн постыг хасах
         if (authorIdStr === userIdStr) {
           return false;
         }
         
-        // Following list дээр байгаа эсэх шалгах
         const isFollowing = followingIds.some(followId => 
           String(followId._id || followId) === authorIdStr
         );
@@ -104,7 +99,6 @@ function Home({ user, onLogout }) {
           <h2>Нүүр</h2>
         </div>
         
-        {/* Filter Tabs */}
         <div className="filter-tabs">
           <button
             className={`filter-tab ${!followingOnly ? 'active' : ''}`}
@@ -150,6 +144,9 @@ function Home({ user, onLogout }) {
           <CreatePost user={user} onPostCreated={handleNewPost} />
         </div>
       </div>
+
+      {/* ✅ НЭМСЭН - Statistics Component */}
+      <Statistics currentUser={user} />
     </div>
   );
 }

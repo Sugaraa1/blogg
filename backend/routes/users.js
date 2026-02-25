@@ -111,13 +111,14 @@ router.get('/search', auth, async (req, res) => {
   }
 });
 
-// Profile авах
+// Profile авах - ✅ ЗАСВАРЛАСАН: blockedUsers populate нэмсэн
 router.get('/:username', async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username })
       .select('-password')
       .populate('followers', 'username displayName avatar')
-      .populate('following', '_id username displayName avatar');
+      .populate('following', '_id username displayName avatar')
+      .populate('blockedUsers', 'username displayName avatar'); // ✅ НЭМСЭН
 
     if (!user) {
       return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
