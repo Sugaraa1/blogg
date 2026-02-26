@@ -143,6 +143,65 @@
   border-radius: 3px 3px 0 0;
 }
 
+/* ✅ НЭМСЭН - Time Filter Section */
+.time-filter-section {
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.time-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.filter-icon {
+  font-size: 16px;
+}
+
+.time-filter-buttons {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.time-filter-btn {
+  padding: 6px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.time-filter-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-secondary);
+}
+
+.time-filter-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
 /* Content */
 .statistics-content {
   flex: 1;
@@ -281,6 +340,7 @@
   gap: 12px;
   font-size: 12px;
   color: var(--text-secondary);
+  flex-wrap: wrap;
 }
 
 .stat-item {
@@ -289,9 +349,18 @@
   gap: 4px;
 }
 
+.stat-item.growth {
+  color: #22c55e;
+}
+
 .stat-number {
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.growth-number {
+  color: #22c55e !important;
+  font-weight: 700;
 }
 
 /* Post Cards */
@@ -418,18 +487,29 @@
 
 .post-stats {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   font-size: 13px;
   color: var(--text-secondary);
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
 
 .post-stat {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.post-stat.engagement {
+  margin-left: auto;
+  color: #f59e0b;
+}
+
+.post-stat.engagement .post-stat-number {
+  color: #f59e0b;
+  font-weight: 700;
 }
 
 .post-stat-number {
@@ -455,8 +535,13 @@
 }
 
 .empty-statistics p {
-  margin: 0;
+  margin: 0 0 8px 0;
   font-size: 15px;
+}
+
+.empty-hint {
+  font-size: 13px;
+  opacity: 0.7;
 }
 
 /* Scrollbar */
@@ -488,5 +573,18 @@
   .statistics-container {
     right: 20px;
     bottom: 80px;
+  }
+  
+  .time-filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .time-filter-buttons {
+    justify-content: stretch;
+  }
+  
+  .time-filter-btn {
+    flex: 1;
   }
 }
