@@ -1,8 +1,8 @@
 /* Statistics Modal */
 .statistics-container {
   position: fixed;
-  bottom: 90px;
-  right: 90px;
+  bottom: 150px; /* ✅ ЗАСВАРЛАСАН - Chat товчноос дээгүүр */
+  right: 20px;
   z-index: 999;
 }
 
@@ -29,10 +29,10 @@
 
 .statistics-modal {
   position: fixed;
-  bottom: 160px;
+  bottom: 220px; /* ✅ ЗАСВАРЛАСАН - Statistics товчноос дээгүүр */
   right: 20px;
   width: 420px;
-  max-height: 700px;
+  max-height: 650px; /* ✅ Бага зэрэг багасгав */
   background: var(--bg-primary);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -143,7 +143,7 @@
   border-radius: 3px 3px 0 0;
 }
 
-/* ✅ НЭМСЭН - Time Filter Section */
+/* Time Filter Section */
 .time-filter-section {
   padding: 12px 16px;
   background: var(--bg-secondary);
@@ -563,16 +563,17 @@
 }
 
 /* Responsive */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .statistics-container {
+    bottom: 140px; /* Mobile дээр бага зэрэг бууруулах */
+    right: 20px;
+  }
+  
   .statistics-modal {
     width: calc(100vw - 40px);
     right: 20px;
-    max-height: calc(100vh - 180px);
-  }
-  
-  .statistics-container {
-    right: 20px;
-    bottom: 80px;
+    bottom: 210px;
+    max-height: calc(100vh - 280px); /* Mobile дээр илүү их зай үлдээх */
   }
   
   .time-filter-section {
@@ -586,5 +587,25 @@
   
   .time-filter-btn {
     flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .statistics-container {
+    bottom: 130px;
+    right: 15px;
+  }
+  
+  .statistics-toggle-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+  }
+  
+  .statistics-modal {
+    width: calc(100vw - 30px);
+    right: 15px;
+    bottom: 190px;
+    max-height: calc(100vh - 250px);
   }
 }
