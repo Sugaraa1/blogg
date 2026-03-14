@@ -1,62 +1,76 @@
+/* ==========================================
+   POST DETAIL — Dark Clean Detail View
+   ========================================== */
+
 .post-detail-container {
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.2s ease;
 }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .back-button {
   background: none;
   border: none;
   color: var(--accent-color);
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
   cursor: pointer;
-  padding: 8px 16px;
-  margin-right: auto;
-  transition: opacity 0.2s;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
 .back-button:hover {
-  opacity: 0.8;
+  background: var(--accent-dim);
 }
 
 .content-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .content-header h2 {
   margin: 0;
 }
 
+/* ── Loading ── */
 .loading-state {
-  text-align: center;
-  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: 2px solid var(--border-color);
   border-top-color: var(--accent-color);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  margin: 0 auto 16px;
+  animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-state p {
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
+}
+
+.empty-state p {
   color: var(--text-secondary);
-  font-size: 18px;
+  font-size: 15px;
 }

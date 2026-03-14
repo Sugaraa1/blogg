@@ -1,62 +1,86 @@
+/* ==========================================
+   EXPLORE — Dark Clean Search & Discovery
+   ========================================== */
+
 .explore-search-bar {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
   position: sticky;
-  top: 0;
+  top: 53px;
   background: var(--bg-primary);
-  z-index: 50;
+  z-index: 39;
+}
+
+[data-theme="dark"] .explore-search-bar {
+  background: rgba(8,11,18,0.92);
+  border-color: rgba(99,179,237,0.07);
+  backdrop-filter: blur(12px);
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 16px;
   border: 1px solid var(--border-color);
-  border-radius: 20px;
-  font-size: 15px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
   outline: none;
-  background: var(--bg-secondary);
+  background: var(--bg-input);
   color: var(--text-primary);
-  transition: border-color 0.2s;
+  font-family: 'Sora', sans-serif;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-
-.search-input::placeholder {
-  color: var(--text-secondary);
-}
-
+.search-input::placeholder { color: var(--text-secondary); }
 .search-input:focus {
   border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
-.explore-container {
-  padding: 0;
-}
+.explore-container { padding: 0; }
 
 .explore-section {
-  padding: 16px;
+  padding: 20px 16px;
   border-bottom: 1px solid var(--border-color);
 }
 
-.explore-section h3 {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0 0 16px 0;
+[data-theme="dark"] .explore-section {
+  border-color: rgba(99,179,237,0.07);
 }
 
+.explore-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+  letter-spacing: -0.2px;
+}
+
+/* ── Users Grid ── */
 .users-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
 }
 
 .user-card {
-  background: var(--bg-secondary);
-  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
   padding: 16px;
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .user-card {
+  background: #111827;
+  border-color: rgba(99,179,237,0.08);
+}
+
+.user-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
 .user-card-link {
@@ -65,140 +89,114 @@
 }
 
 .user-card-avatar {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 700;
   overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
 }
-
-.user-card-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.user-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
 .user-card-info h4 {
-  margin: 0 0 2px 0;
-  font-size: 17px;
-  color: var(--text-primary);
-}
-
-.user-card-info p {
-  margin: 0 0 8px 0;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.user-bio {
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.user-followers {
+  margin: 0 0 3px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.follow-btn {
-  align-self: flex-start;
-  padding: 8px 16px;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+.user-card-info p {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
 }
 
-.follow-btn:hover:not(.following) {
-  opacity: 0.85;
-}
-
-.follow-btn.following {
-  background: var(--bg-primary);
-  color: var(--accent-color);
-  border: 1px solid var(--accent-color);
-}
-
-.trends-list {
-  display: none;
-}
-
-.trend {
-  padding: 12px;
-  background: var(--bg-primary);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.trend:hover {
-  background: var(--bg-hover);
-}
-
-.trend-tag {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.trend-posts {
-  margin: 0;
+.user-bio {
   font-size: 13px;
   color: var(--text-secondary);
-}
-
-.loading-state {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--border-color);
-  border-top-color: var(--accent-color);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  margin: 0 auto 16px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-state p {
-  color: var(--text-secondary);
-  font-size: 15px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-secondary);
-  font-size: 18px;
+  line-height: 1.5;
 }
 
 .user-stats {
-  margin: 8px 0 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
+  margin: 4px 0 0;
 }
 
 .user-followers,
 .user-following {
   font-weight: 600;
   color: var(--text-primary);
+}
+
+/* ── Follow Button ── */
+.follow-btn {
+  padding: 8px 16px;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 13px;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  align-self: flex-start;
+}
+.follow-btn:hover:not(.following) {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+.follow-btn.following {
+  background: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+.follow-btn.following:hover {
+  background: var(--accent-dim);
+}
+
+/* ── Loading / Empty States ── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-state p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
 }

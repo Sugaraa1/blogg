@@ -1,19 +1,24 @@
+/* ==========================================
+   CREATE POST — Dark Minimal Composer
+   ========================================== */
+
 .create-post {
   background: var(--bg-secondary);
   padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  margin-top: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .create-post {
+  background: #111827;
+  border-color: rgba(99,179,237,0.08);
 }
 
 .create-post .card {
   background: transparent;
-  border-radius: 0;
+  border: none;
   box-shadow: none;
   padding: 0;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
 }
 
 .create-post-header {
@@ -23,20 +28,20 @@
   width: 100%;
 }
 
-
 .user-avatar-small {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 700;
   flex-shrink: 0;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .user-avatar-small img {
@@ -53,31 +58,31 @@
 
 .create-post textarea {
   width: 100%;
-  padding: 10px 0;
+  padding: 8px 0;
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   resize: none;
   outline: none;
   color: var(--text-primary);
   background: transparent;
-  line-height: 22px;
-  min-height: 140px;
+  line-height: 1.6;
+  min-height: 80px;
+  font-family: 'Sora', sans-serif;
 }
 
 .create-post textarea::placeholder {
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
-.file-input-hidden {
-  display: none;
-}
+.file-input-hidden { display: none; }
 
 .image-preview {
   position: relative;
   margin-top: 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  max-width: 320px;
+  border: 1px solid var(--border-color);
+  max-width: 280px;
 }
 
 .image-preview img {
@@ -90,22 +95,33 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.7);
   color: white;
   border: none;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
 }
+.remove-image-btn:hover { background: rgba(0,0,0,0.9); }
 
+/* Actions Row */
 .post-actions-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 6px;
-  flex-wrap: wrap;
-  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .post-actions-row {
+  border-color: rgba(99,179,237,0.07);
 }
 
 .left-actions {
@@ -115,57 +131,60 @@
 }
 
 .file-icon-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(29,155,240,0.06);
+  background: var(--accent-dim);
   border: none;
   cursor: pointer;
   color: var(--accent-color);
+  transition: all 0.15s;
 }
-
-.file-icon-btn svg {
-  width: 16px;
-  height: 16px;
-}
+.file-icon-btn:hover { background: rgba(99,179,237,0.2); }
+.file-icon-btn svg { width: 15px; height: 15px; }
 
 .image-filename {
   color: var(--text-secondary);
-  font-size: 12px;
-  max-width: 140px;
+  font-size: 11px;
+  max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .right-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .char-count {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
 }
+
+.char-count.warning { color: var(--warning-color); }
+.char-count.danger  { color: var(--error-color); }
 
 .submit-btn {
-  padding: 6px 12px;
+  padding: 7px 18px;
   background: var(--accent-color);
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-full);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
+  font-family: 'Sora', sans-serif;
   cursor: pointer;
+  transition: all 0.15s;
 }
-
-.submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.submit-btn:hover:not(:disabled) {
+  opacity: 0.85;
+  transform: translateY(-1px);
 }
-
-
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }

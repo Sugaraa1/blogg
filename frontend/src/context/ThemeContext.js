@@ -5,6 +5,7 @@ export const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
+    // ✅ Default нь dark байх ёстой
     return savedTheme || 'dark';
   });
 

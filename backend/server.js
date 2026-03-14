@@ -7,7 +7,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
@@ -17,26 +16,23 @@ const io = socketIO(server, {
   }
 });
 
-// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 const upload = multer({ storage });
 
-// Middleware
+app.use('/api/statistics', require('./routes/statistics'));
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Ensure uploads directory exists and serve it
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 app.use('/uploads', express.static(uploadsDir));
 
-// MongoDB холболт
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB холбогдсон'))
   .catch(err => console.error('MongoDB алдаа:', err));
@@ -47,9 +43,9 @@ app.use('/api/posts', require('./routes/posts'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/messages', require('./routes/messages'));
-app.use('/api/reports', require('./routes/reports')); // 🆕 Reports route
+app.use('/api/reports', require('./routes/reports'));
+app.use('/api/statistics', require('./routes/statistics')); // ✅ НЭМСЭН
 
-// File upload endpoint
 const auth = require('./middleware/auth');
 app.post('/api/upload', auth, upload.single('file'), (req, res) => {
   try {
@@ -62,20 +58,17 @@ app.post('/api/upload', auth, upload.single('file'), (req, res) => {
   }
 });
 
-// Socket.io for real-time messaging
 const userSockets = new Map();
 
 io.on('connection', (socket) => {
   socket.on('user_connected', (userId) => {
     userSockets.set(userId, socket.id);
-    console.log(`User ${userId} connected with socket ${socket.id}`);
   });
 
   socket.on('disconnect', () => {
     for (let [userId, socketId] of userSockets.entries()) {
       if (socketId === socket.id) {
         userSockets.delete(userId);
-        console.log(`User ${userId} disconnected`);
         break;
       }
     }
@@ -84,25 +77,20 @@ io.on('connection', (socket) => {
   socket.on('send_message', (data) => {
     const { receiver } = data;
     const receiverSocketId = userSockets.get(receiver);
-    
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('receive_message', data);
     }
   });
 
   socket.on('typing', (data) => {
-    const { receiver } = data;
-    const receiverSocketId = userSockets.get(receiver);
-    
+    const receiverSocketId = userSockets.get(data.receiver);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('user_typing', data);
     }
   });
 
   socket.on('stop_typing', (data) => {
-    const { receiver } = data;
-    const receiverSocketId = userSockets.get(receiver);
-    
+    const receiverSocketId = userSockets.get(data.receiver);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('user_stop_typing', data);
     }

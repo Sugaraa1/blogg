@@ -1,13 +1,18 @@
+/* ==========================================
+   PROFILE EXTRA — Block List Styles
+   ========================================== */
+
 .unblock-btn-small {
-  padding: 6px 16px;
+  padding: 6px 14px;
   background: transparent;
-  color: #10b981;
-  border: 1.5px solid #10b981;
-  border-radius: 20px;
-  font-size: 13px;
+  color: var(--error-color);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 12px;
   font-weight: 600;
+  font-family: 'Sora', sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
   display: inline-flex;
@@ -16,9 +21,8 @@
 }
 
 .unblock-btn-small:hover {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #059669;
-  color: #059669;
+  background: rgba(248, 113, 113, 0.08);
+  border-color: var(--error-color);
   transform: translateY(-1px);
 }
 
@@ -34,5 +38,6 @@
 
 .empty-list p {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 14px;
 }

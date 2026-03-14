@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import Post from './Post';
 import CreatePost from './CreatePost';
-import Statistics from './Statistics'; // ✅ НЭМСЭН
+import Statistics from './Statistics';
 import './Home.css';
 
 function Home({ user, onLogout }) {
@@ -12,7 +12,7 @@ function Home({ user, onLogout }) {
   const [followingOnly, setFollowingOnly] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
 
-  const fetchBlockedUsers = async () => {
+  const fetchBlockedUsers = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
@@ -22,9 +22,9 @@ function Home({ user, onLogout }) {
     } catch (error) {
       console.error('Blocked users авахад алдаа:', error);
     }
-  };
+  }, [user.username]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/posts');
       setPosts(response.data);
@@ -33,20 +33,22 @@ function Home({ user, onLogout }) {
       console.error('Пост татахад алдаа:', error);
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchPosts();
     fetchBlockedUsers();
-  }, []);
+  }, [fetchPosts, fetchBlockedUsers]);
 
   const handleNewPost = (newPost) => {
-    setPosts([newPost, ...posts]);
+    setPosts(prev => [newPost, ...prev]);
   };
 
   const handlePostUpdate = (updatedPost) => {
     if (updatedPost === null) {
       fetchPosts();
+    } else {
+      setPosts(prev => prev.map(p => p._id === updatedPost._id ? updatedPost : p));
     }
   };
 
@@ -55,7 +57,7 @@ function Home({ user, onLogout }) {
 
     filtered = filtered.filter(post => {
       const authorId = post.author?._id || post.author;
-      const isBlocked = blockedUsers.some(blockedId => 
+      const isBlocked = blockedUsers.some(blockedId =>
         String(blockedId._id || blockedId) === String(authorId)
       );
       return !isBlocked;
@@ -63,25 +65,13 @@ function Home({ user, onLogout }) {
 
     if (followingOnly) {
       const followingIds = user.following || [];
-      
-      if (followingIds.length === 0) {
-        return [];
-      }
-      
+      if (followingIds.length === 0) return [];
       filtered = filtered.filter(post => {
         const authorId = post.author?._id || post.author;
-        const authorIdStr = String(authorId);
-        const userIdStr = String(user.id);
-        
-        if (authorIdStr === userIdStr) {
-          return false;
-        }
-        
-        const isFollowing = followingIds.some(followId => 
-          String(followId._id || followId) === authorIdStr
+        if (String(authorId) === String(user.id)) return false;
+        return followingIds.some(followId =>
+          String(followId._id || followId) === String(authorId)
         );
-        
-        return isFollowing;
       });
     }
 
@@ -93,12 +83,12 @@ function Home({ user, onLogout }) {
   return (
     <div className="home-layout">
       <Sidebar user={user} onLogout={onLogout} />
-      
+
       <div className="main-content">
         <div className="content-header">
           <h2>Нүүр</h2>
         </div>
-        
+
         <div className="filter-tabs">
           <button
             className={`filter-tab ${!followingOnly ? 'active' : ''}`}
@@ -113,7 +103,7 @@ function Home({ user, onLogout }) {
             Дагаж байгаа
           </button>
         </div>
-        
+
         {loading ? (
           <div className="loading-state">
             <div className="spinner"></div>
@@ -124,15 +114,19 @@ function Home({ user, onLogout }) {
             {filteredPosts.length === 0 ? (
               <div className="empty-state">
                 <p>
-                  {followingOnly 
-                    ? '📭 Та одоогоор хэнийг ч дагаагүй байна. Explore хэсэгт очоод хүмүүс олоорой!'
-                    : '🐦 Пост байхгүй байна.'
-                  }
+                  {followingOnly
+                    ? '📭 Та одоогоор хэнийг ч дагаагүй байна.'
+                    : '🐦 Пост байхгүй байна.'}
                 </p>
               </div>
             ) : (
               filteredPosts.map(post => (
-                <Post key={post._id} post={post} currentUser={user} onPostUpdate={handlePostUpdate} />
+                <Post
+                  key={post._id}
+                  post={post}
+                  currentUser={user}
+                  onPostUpdate={handlePostUpdate}
+                />
               ))
             )}
           </div>
@@ -145,7 +139,6 @@ function Home({ user, onLogout }) {
         </div>
       </div>
 
-      {/* ✅ НЭМСЭН - Statistics Component */}
       <Statistics currentUser={user} />
     </div>
   );

@@ -11,13 +11,17 @@ function Sidebar({ user, onLogout }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const menuItems = [
-    { path: '/', icon: '🏠', label: 'Нүүр' },
-    { path: '/explore', icon: '🔍', label: 'Хэрэглэгч хайх' },
-    { path: '/notifications', icon: '🔔', label: 'Мэдэгдэл', badge: unreadCount > 0 ? unreadCount : null },
-    { path: `/profile/${user.username}`, icon: '👤', label: 'Профайл' },
+    { path: '/',                         icon: '🏠', label: 'Нүүр' },
+    { path: '/explore',                   icon: '🔍', label: 'Хайх' },
+    {
+      path: '/notifications',
+      icon: '🔔',
+      label: 'Мэдэгдэл',
+      badge: unreadCount > 0 ? unreadCount : null
+    },
+    { path: `/profile/${user.username}`,  icon: '👤', label: 'Профайл' },
   ];
 
-  // Fetch unread notification count
   const fetchUnreadCount = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -26,14 +30,13 @@ function Sidebar({ user, onLogout }) {
       });
       setUnreadCount(response.data.unreadCount);
     } catch (error) {
-      console.log('Unread count авах алдаа:', error);
+      // silent
     }
   };
 
   useEffect(() => {
     fetchUnreadCount();
-    // Refresh count every 10 seconds
-    const interval = setInterval(fetchUnreadCount, 10000);
+    const interval = setInterval(fetchUnreadCount, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -42,21 +45,29 @@ function Sidebar({ user, onLogout }) {
     navigate('/login');
   };
 
-  const getInitials = (name) => {
-    if (!name) return '?';
-    return name.charAt(0).toUpperCase();
+  const handlePostBtn = () => {
+    if (location.pathname === '/') {
+      const el = document.getElementById('create-post-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        el.querySelector('textarea')?.focus();
+      }
+    } else {
+      navigate('/');
+    }
   };
 
-  // Avatar зураг шалгах - хоосон string эсвэл undefined
   const hasAvatar = user.avatar && user.avatar.trim() !== '';
 
   return (
     <div className="sidebar">
+      {/* Logo */}
       <Link to="/" className="sidebar-logo">
         <div className="logo-icon">🐦</div>
-        <div className="logo-text">Э-Блог</div>
+        <span className="logo-text">Э-Блог</span>
       </Link>
 
+      {/* Navigation */}
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
           <Link
@@ -66,50 +77,39 @@ function Sidebar({ user, onLogout }) {
           >
             <span className="nav-icon-wrapper">
               <span className="nav-icon">{item.icon}</span>
-              {item.badge && <span className="notification-badge">{item.badge}</span>}
+              {item.badge && (
+                <span className="notification-badge">{item.badge}</span>
+              )}
             </span>
             <span className="nav-label">{item.label}</span>
           </Link>
         ))}
       </nav>
 
-      <button 
-        className="tweet-button"
-        onClick={() => {
-          if (location.pathname === '/') {
-            // Scroll to post creation area
-            const element = document.getElementById('create-post-section');
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth' });
-              element.querySelector('textarea')?.focus();
-            }
-          } else {
-            // Navigate to home
-            navigate('/');
-          }
-        }}
-      >
+      {/* Post Button */}
+      <button className="tweet-button" onClick={handlePostBtn}>
         Пост
       </button>
 
+      {/* Theme Toggle */}
       <div className="theme-toggle-container">
         <button className="theme-toggle" onClick={toggleTheme}>
           <span className="theme-icon">{theme === 'light' ? '🌙' : '☀️'}</span>
           <span className="theme-label">
-            {theme === 'dark' }
+            {theme === 'dark' ? '' : ''}
           </span>
         </button>
       </div>
 
+      {/* User + Logout */}
       <div className="sidebar-footer">
         <Link to={`/profile/${user.username}`} className="user-profile-link">
           <div className="user-profile">
             <div className="user-avatar">
-              {hasAvatar ? (
-                <img src={user.avatar} alt={user.displayName} />
-              ) : (
-                getInitials(user.displayName)
-              )}
+              {hasAvatar
+                ? <img src={user.avatar} alt={user.displayName} />
+                : user.displayName?.charAt(0).toUpperCase() || '?'
+              }
             </div>
             <div className="user-details">
               <div className="user-name">{user.displayName}</div>
@@ -117,8 +117,9 @@ function Sidebar({ user, onLogout }) {
             </div>
           </div>
         </Link>
+
         <button className="logout-button" onClick={handleLogout}>
-          🚪 Гарах
+        Гарах
         </button>
       </div>
     </div>

@@ -218,7 +218,7 @@ router.post('/:id/follow', auth, async (req, res) => {
         recipient: req.params.id,
         actor: req.userId,
         type: 'follow',
-        message: `${currentUser.displayName} таны follow хийлээ`
+        message: `${currentUser.displayName} таныг follow хийлээ`
       });
       
       res.json({ message: 'Follow амжилттай', isFollowing: true });

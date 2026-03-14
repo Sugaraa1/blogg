@@ -1,137 +1,188 @@
+/* ==========================================
+   HOME — Clean Dark Layout
+   ========================================== */
+
 .home-layout {
   display: flex;
   min-height: 100vh;
   background: var(--bg-primary);
-  transition: background-color 0.2s ease;
+  padding-left: 260px;
+  padding-right: 340px;
+  justify-content: center;
 }
 
+@media (max-width: 1280px) {
+  .home-layout {
+    padding-left: 72px;
+    padding-right: 0;
+  }
+}
+@media (max-width: 768px) {
+  .home-layout {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* ── Main Feed ── */
 .main-content {
-  flex: 1;
+  width: 100%;
   max-width: 600px;
+  min-height: 100vh;
   border-right: 1px solid var(--border-color);
   border-left: 1px solid var(--border-color);
   margin: 0 auto;
-  background: var(--bg-primary);
-  min-height: 100vh;
 }
 
+[data-theme="dark"] .main-content {
+  border-color: rgba(99,179,237,0.07);
+}
+
+/* ── Sticky Header ── */
 .content-header {
   position: sticky;
   top: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(12px);
-  padding: 0;
+  background: rgba(8, 11, 18, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-color);
-  z-index: 10;
+  z-index: 40;
+  padding: 0;
 }
 
 [data-theme="light"] .content-header {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(248, 250, 252, 0.85);
 }
 
 .content-header h2 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  padding: 16px;
-  line-height: 24px;
+  padding: 16px 20px;
+  letter-spacing: -0.3px;
 }
 
-/* 🆕 Filter Tabs */
+/* ── Filter Tabs ── */
 .filter-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 53px;
-  background: var(--bg-primary);
-  z-index: 9;
+}
+
+[data-theme="dark"] .filter-tabs {
+  border-color: rgba(99,179,237,0.07);
 }
 
 .filter-tab {
   flex: 1;
-  padding: 16px;
+  padding: 14px 16px;
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
+  font-family: 'Sora', sans-serif;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.18s ease;
   position: relative;
 }
 
 .filter-tab:hover {
   background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .filter-tab.active {
-  color: var(--text-primary);
-  font-weight: 700;
+  color: var(--accent-color);
+  font-weight: 600;
 }
 
 .filter-tab.active::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
   background: var(--accent-color);
-  border-radius: 4px 4px 0 0;
+  border-radius: 2px 2px 0 0;
 }
 
+/* ── Posts Container ── */
 .posts-container {
   display: flex;
   flex-direction: column;
 }
 
+/* ── Loading ── */
 .loading-state {
-  text-align: center;
-  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  gap: 16px;
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: 2px solid var(--border-color);
   border-top-color: var(--accent-color);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  margin: 0 auto 16px;
+  animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-state p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ── Empty State ── */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  text-align: center;
+}
+
+.empty-state p {
   color: var(--text-secondary);
   font-size: 15px;
+  line-height: 1.6;
+  max-width: 320px;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-secondary);
-  font-size: 18px;
-}
-
+/* ── Right Sidebar ── */
 .right-sidebar {
-  width: 350px;
-  padding: 4px 16px;
+  width: 340px;
+  padding: 16px;
   position: fixed;
   right: 0;
   top: 0;
   height: 100vh;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  border-left: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .right-sidebar {
+  border-left-color: rgba(99,179,237,0.07);
 }
 
 .composer-widget {
-  margin-top: 12px;
-  z-index: 100;
+  position: sticky;
+  top: 16px;
+}
+
+@media (max-width: 1200px) {
+  .right-sidebar { display: none; }
+  .main-content  { border-right: none; }
+}
+
+@media (max-width: 768px) {
+  .main-content { border-left: none; max-width: 100%; }
 }
