@@ -147,7 +147,7 @@ function Explore({ user, onLogout, updateUser }) {
         ) : (
           <div className="explore-container">
             <div className="explore-section">
-              <h3>🌟 {searchQuery ? 'Хайлтын үр дүн' : 'Бүх хэрэглэгчид'}</h3>
+              <h3>{searchQuery ? 'Хайлтын үр дүн' : 'Бүх хэрэглэгчид'}</h3>
               
               {filteredUsers.length === 0 ? (
                 <div className="empty-state">

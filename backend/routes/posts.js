@@ -378,4 +378,75 @@ router.delete('/:id/comment/:commentId', auth, async (req, res) => {
   }
 });
 
+// 🆕 ALGORITHM FEED
+router.get('/feed', async (req, res) => {
+  try {
+    const userId = req.query.userId;
+    const userFollowing = req.query.following ? JSON.parse(req.query.following) : [];
+
+    const posts = await Post.find()
+      .populate('author', 'username displayName avatar')
+      .populate('comments.user', 'username displayName avatar')
+      .populate('comments.replies.user', 'username displayName avatar')
+      .populate({
+        path: 'repostedPost',
+        populate: [
+          { path: 'author', select: 'username displayName avatar' },
+          { path: 'comments.user', select: 'username displayName avatar' }
+        ]
+      })
+      .sort({ createdAt: -1 })
+      .limit(300);
+
+    const scoredPosts = posts.map(post => {
+      const p = post.toObject();
+
+      const likesCount = p.likes?.length || 0;
+      const commentsCount = p.comments?.length || 0;
+      const retweetsCount = p.retweets?.length || 0;
+      const viewsCount = p.views?.length || 0;
+
+      // Хэр хуучин бэ (цагаар)
+      const ageHours = (Date.now() - new Date(p.createdAt)) / (1000 * 60 * 60);
+
+      // Цаг буурах оноо - 48 цагийн дараа маш бага оноо
+      const timeDecay = Math.exp(-ageHours / 48);
+
+      // Engagement оноо
+      const engagementScore =
+        likesCount * 3 +
+        commentsCount * 5 +
+        retweetsCount * 2 +
+        viewsCount * 0.5;
+
+      // Following бол +50% оноо
+      const isFollowing = userFollowing.includes(String(p.author?._id));
+      const followingBonus = isFollowing ? 1.5 : 1;
+
+      // Шинэ post бол +bonus (24 цагийн дотор)
+      const newPostBonus = ageHours < 24 ? 1.3 : 1;
+
+      // Өөрийн post бол харуулахгүй (optional)
+      const isOwnPost = String(p.author?._id) === String(userId);
+
+      // Эцсийн оноо
+      p.algorithmScore = engagementScore * timeDecay * followingBonus * newPostBonus;
+      p.isOwnPost = isOwnPost;
+
+      return p;
+    });
+
+    // Оноогоор эрэмбэлэх
+    scoredPosts.sort((a, b) => {
+      // 10% магадлалаар random post харуулах (filter bubble арилгах)
+      if (Math.random() < 0.1) return Math.random() - 0.5;
+      return b.algorithmScore - a.algorithmScore;
+    });
+
+    res.json(scoredPosts.slice(0, 50));
+  } catch (error) {
+    res.status(500).json({ message: 'Серверийн алдаа', error: error.message });
+  }
+});
+
 module.exports = router;

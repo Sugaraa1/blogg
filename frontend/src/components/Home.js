@@ -25,15 +25,22 @@ function Home({ user, onLogout }) {
   }, [user.username]);
 
   const fetchPosts = useCallback(async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/posts');
-      setPosts(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Пост татахад алдаа:', error);
-      setLoading(false);
-    }
-  }, []);
+  try {
+    const token = localStorage.getItem('token');
+    const followingIds = JSON.stringify(
+      (user.following || []).map(f => f._id || f)
+    );
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/feed?userId=${user.id}&following=${encodeURIComponent(followingIds)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(response.data);
+    setLoading(false);
+  } catch (error) {
+    console.error('Пост татахад алдаа:', error);
+    setLoading(false);
+  }
+}, [user.id, user.following]);
 
   useEffect(() => {
     fetchPosts();
