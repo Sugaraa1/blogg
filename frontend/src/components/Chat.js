@@ -21,12 +21,12 @@ function Chat({ currentUser, onlineUsers = [] }) {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
     if (avatar.startsWith('data:image')) return avatar; // Base64
-    return `http://localhost:5000${avatar}`;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${avatar}`;
   };
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:5000');
+      socketRef.current = io('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}');
     }
     const socket = socketRef.current;
 
@@ -40,7 +40,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
           try {
             const token = localStorage.getItem('token');
             await axios.put(
-              `http://localhost:5000/api/messages/${data._id}/read`,
+              `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/${data._id}/read`,
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -83,7 +83,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
   const fetchConversations = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/messages/conversations', {
+      const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/conversations', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setConversations(response.data);
@@ -97,7 +97,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/search?q=', {
+      const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/search?q=', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const filtered = response.data.filter(u => u._id !== currentUser.id);

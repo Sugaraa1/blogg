@@ -15,7 +15,7 @@ function Home({ user, onLogout }) {
   const fetchBlockedUsers = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${user.username}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBlockedUsers(response.data.blockedUsers || []);
@@ -31,7 +31,7 @@ function Home({ user, onLogout }) {
       (user.following || []).map(f => f._id || f)
     );
     const response = await axios.get(
-      `http://localhost:5000/api/posts/feed?userId=${user.id}&following=${encodeURIComponent(followingIds)}`,
+      `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/feed?userId=${user.id}&following=${encodeURIComponent(followingIds)}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     setPosts(response.data);

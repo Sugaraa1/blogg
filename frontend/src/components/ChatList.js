@@ -5,7 +5,7 @@ function ChatList({ conversations, onSelectUser, onlineUsers = [] }) {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
     if (avatar.startsWith('data:image')) return avatar; // Base64
-    return `http://localhost:5000${avatar}`;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${avatar}`;
   };
 
   const formatTime = (date) => {

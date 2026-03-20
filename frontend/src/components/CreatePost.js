@@ -33,7 +33,7 @@ function CreatePost({ user, onPostCreated }) {
       if (imageFile) formData.append('image', imageFile);
 
       const response = await axios.post(
-        'http://localhost:5000/api/posts',
+        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts',
         formData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
       );

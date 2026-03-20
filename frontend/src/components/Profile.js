@@ -43,7 +43,7 @@ function Profile({ user, onLogout, updateUser }) {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/users/${username}`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${username}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(response.data);
@@ -59,7 +59,7 @@ function Profile({ user, onLogout, updateUser }) {
 
   const fetchUserPosts = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/users/${username}/posts`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${username}/posts`);
       setPosts(response.data);
     } catch (error) {
       console.error('Постууд татахад алдаа:', error);
@@ -71,7 +71,7 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:5000/api/users/${profile._id}/follow-status`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${profile._id}/follow-status`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsFollowing(response.data.isFollowing);
@@ -85,7 +85,7 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:5000/api/users/${profile._id}/block-status`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${profile._id}/block-status`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsBlocked(response.data.isBlocked);
@@ -103,7 +103,7 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/users/${profile._id}/block`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${profile._id}/block`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -120,7 +120,7 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/users/${userId}/follow`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${userId}/follow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -138,14 +138,14 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/users/${profile._id}/follow`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${profile._id}/follow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsFollowing(response.data.isFollowing);
       
       if (updateUser && user.id !== profile._id) {
-        const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`);
+        const updatedUser = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${user.username}`);
         updateUser({
           ...user,
           following: updatedUser.data.following,
@@ -164,7 +164,7 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        'http://localhost:5000/api/users/profile',
+        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile',
         { bio: editData.bio },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -213,7 +213,7 @@ function Profile({ user, onLogout, updateUser }) {
           : { coverImage: base64String };
         
         const response = await axios.put(
-          'http://localhost:5000/api/users/profile',
+          '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile',
           updateData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -261,7 +261,7 @@ function Profile({ user, onLogout, updateUser }) {
         : { coverImage: imageUrl };
       
       const response = await axios.put(
-        'http://localhost:5000/api/users/profile',
+        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile',
         updateData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -777,7 +777,7 @@ function Profile({ user, onLogout, updateUser }) {
                           try {
                             const token = localStorage.getItem('token');
                             const response = await axios.post(
-                              `http://localhost:5000/api/users/${userId}/block`,
+                              `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${userId}/block`,
                               {},
                               { headers: { Authorization: `Bearer ${token}` } }
                             );

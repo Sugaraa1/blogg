@@ -8,7 +8,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
     if (avatar.startsWith('data:image')) return avatar; // Base64
-    return `http://localhost:5000${avatar}`;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${avatar}`;
   };
 
   const [messages, setMessages] = useState([]);
@@ -33,7 +33,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:5000/api/messages/${selectedUser.id}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/${selectedUser.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessages(response.data);
@@ -59,7 +59,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5000/api/messages/${messageId}/read`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/${messageId}/read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -115,7 +115,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
         formData.append('file', image);
 
         const uploadResponse = await axios.post(
-          'http://localhost:5000/api/upload',
+          '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/upload',
           formData,
           { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
         );
@@ -123,7 +123,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
       }
 
       const response = await axios.post(
-        'http://localhost:5000/api/messages',
+        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages',
         {
           receiver: selectedUser.id,
           content: messageInput.trim(),
@@ -238,7 +238,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
               
               <div className="message-content">
                 {msg.image && (
-                  <img src={`http://localhost:5000${msg.image}`} alt="Message" className="message-image" />
+                  <img src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${msg.image}`} alt="Message" className="message-image" />
                 )}
                 {msg.content && <p>{msg.content}</p>}
               </div>

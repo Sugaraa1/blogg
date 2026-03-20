@@ -18,7 +18,7 @@ function ProfileActions({ profileUser, currentUser, isBlocked: initialBlocked, o
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:5000/api/reports/user/${profileUser._id}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/reports/user/${profileUser._id}`,
         { reason: reportReason, description: reportDescription },
         { headers: { Authorization: `Bearer ${token}` } }
       );

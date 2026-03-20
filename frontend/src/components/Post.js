@@ -39,7 +39,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
         const postId = post.repostedPost ? post.repostedPost._id : post._id;
         if (!views.includes(currentUser.id)) {
           const response = await axios.post(
-            `http://localhost:5000/api/posts/${postId}/view`,
+            `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postId}/view`,
             {},
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -57,7 +57,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/posts/${post._id}/like`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${post._id}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -78,7 +78,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/posts/${post._id}/comment`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${post._id}/comment`,
         { text: commentText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -98,7 +98,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
       const token = localStorage.getItem('token');
       const postId = post.repostedPost ? post.repostedPost._id : post._id;
       const response = await axios.post(
-        `http://localhost:5000/api/posts/${postId}/comment/${commentId}/like`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postId}/comment/${commentId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -117,7 +117,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
       const token = localStorage.getItem('token');
       const postId = post.repostedPost ? post.repostedPost._id : post._id;
       const response = await axios.post(
-        `http://localhost:5000/api/posts/${postId}/comment/${commentId}/reply`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postId}/comment/${commentId}/reply`,
         { text: replyText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -136,7 +136,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
       const token = localStorage.getItem('token');
       const postToRepost = post.repostedPost ? post.repostedPost._id : post._id;
       const response = await axios.post(
-        `http://localhost:5000/api/posts/${postToRepost}/repost`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postToRepost}/repost`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -158,7 +158,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
     const token = localStorage.getItem('token');
     const postId = post.repostedPost ? post.repostedPost._id : post._id;
     const response = await axios.get(
-      `http://localhost:5000/api/posts/${postId}/viewers`,
+      `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postId}/viewers`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     
@@ -190,7 +190,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
       const token = localStorage.getItem('token');
       const postIdToDelete = post._id;
       await axios.delete(
-        `http://localhost:5000/api/posts/${postIdToDelete}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postIdToDelete}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -215,7 +215,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
       const postId = post.repostedPost ? post.repostedPost._id : post._id;
       
       await axios.delete(
-        `http://localhost:5000/api/posts/${postId}/comment/${commentId}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts/${postId}/comment/${commentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -297,7 +297,7 @@ function Post({ post, currentUser, onPostUpdate, showComments: initialShowCommen
         {displayPost.image && (
           <div className="post-image">
             <img
-              src={displayPost.image.startsWith('http') ? displayPost.image : `http://localhost:5000${displayPost.image}`}
+              src={displayPost.image.startsWith('http') ? displayPost.image : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${displayPost.image}`}
               alt="Post"
             />
           </div>

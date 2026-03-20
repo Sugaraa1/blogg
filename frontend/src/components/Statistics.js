@@ -19,12 +19,12 @@ function Statistics({ currentUser }) {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/statistics/trending-users?period=${timeFilter}&limit=10`,
+          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/statistics/trending-users?period=${timeFilter}&limit=10`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTrendingUsers(response.data);
       } catch {
-        const response = await axios.get('http://localhost:5000/api/users/search?q=&limit=100', {
+        const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/search?q=&limit=100', {
           headers: { Authorization: `Bearer ${token}` }
         });
         let users = response.data.filter(u => u._id !== currentUser.id);
@@ -43,12 +43,12 @@ function Statistics({ currentUser }) {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/statistics/popular-posts?period=${timeFilter}&limit=10`,
+          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/statistics/popular-posts?period=${timeFilter}&limit=10`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setPopularPosts(response.data);
       } catch {
-        const response = await axios.get('http://localhost:5000/api/posts');
+        const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts');
         let posts = response.data;
 
         // ✅ filterDate - зөвхөн энд ашиглах (unused var warning арилгав)
@@ -102,7 +102,7 @@ function Statistics({ currentUser }) {
   const getAvatarUrl = (avatar) => {
     if (!avatar) return null;
     if (avatar.startsWith('http') || avatar.startsWith('data:image')) return avatar;
-    return `http://localhost:5000${avatar}`;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${avatar}`;
   };
 
   return (
@@ -213,7 +213,7 @@ function Statistics({ currentUser }) {
                     <div className="post-content">{post.content}</div>
                     {post.image && (
                       <img
-                        src={post.image.startsWith('http') ? post.image : `http://localhost:5000${post.image}`}
+                        src={post.image.startsWith('http') ? post.image : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${post.image}`}
                         alt="Post"
                         className="post-image-preview"
                       />

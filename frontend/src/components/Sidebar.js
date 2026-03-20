@@ -25,7 +25,7 @@ function Sidebar({ user, onLogout }) {
   const fetchUnreadCount = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/notifications/count', {
+      const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications/count', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUnreadCount(response.data.unreadCount);

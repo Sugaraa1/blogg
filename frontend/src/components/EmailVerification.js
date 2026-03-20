@@ -31,7 +31,7 @@ function EmailVerification({ onVerified }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-email', {
+      const response = await axios.post('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/verify-email', {
         email,
         code
       });
@@ -59,7 +59,7 @@ function EmailVerification({ onVerified }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/resend-verification', {
+      const response = await axios.post('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/resend-verification', {
         email
       });
       setSuccess(response.data.message);
