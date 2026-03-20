@@ -14,7 +14,7 @@ function PostDetail({ user, onLogout }) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts`);
         const foundPost = response.data.find(p => p._id === postId);
         
         if (foundPost) {

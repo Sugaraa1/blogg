@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom'; // 🆕 useLocation нэмсэн
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Auth.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function EmailVerification({ onVerified }) {
   const navigate = useNavigate();
-  const location = useLocation(); // 🆕 НЭМСЭН
-  
-  // 🆕 state-аас email авах
+  const location = useLocation();
+
   const emailFromState = location.state?.email;
   const messageFromState = location.state?.message;
-  
-  const [email] = useState(emailFromState || ''); // 🆕 ЗАСВАРЛАСАН
+
+  const [email] = useState(emailFromState || '');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 🆕 Email байхгүй бол login page руу буцаах
   useEffect(() => {
     if (!email) {
       navigate('/login');
@@ -31,18 +31,17 @@ function EmailVerification({ onVerified }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/verify-email', {
+      const response = await axios.post(`${API_URL}/api/auth/verify-email`, {
         email,
         code
       });
-      
+
       setSuccess(response.data.message);
-      
-      // Login хийх
+
       if (onVerified) {
         onVerified(response.data.user, response.data.token);
       }
-      
+
       setTimeout(() => {
         navigate('/');
       }, 1500);
@@ -59,7 +58,7 @@ function EmailVerification({ onVerified }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/resend-verification', {
+      const response = await axios.post(`${API_URL}/api/auth/resend-verification`, {
         email
       });
       setSuccess(response.data.message);
@@ -70,7 +69,6 @@ function EmailVerification({ onVerified }) {
     }
   };
 
-  // 🆕 Email байхгүй бол хоосон screen харуулах
   if (!email) {
     return null;
   }
@@ -79,8 +77,7 @@ function EmailVerification({ onVerified }) {
     <div className="auth-container">
       <div className="auth-box">
         <h1>✉️ И-мэйл баталгаажуулалт</h1>
-        
-        {/* 🆕 Success message from registration */}
+
         {messageFromState && (
           <div style={{
             background: 'rgba(34, 197, 94, 0.15)',
@@ -96,11 +93,11 @@ function EmailVerification({ onVerified }) {
             {messageFromState}
           </div>
         )}
-        
+
         <p style={{ textAlign: 'center', color: '#888', marginBottom: '20px', fontSize: '15px' }}>
           <strong style={{ color: '#fff' }}>{email}</strong> хаяг руу илгээсэн 6 оронтой кодыг оруулна уу
         </p>
-        
+
         {error && <div className="error-message">{error}</div>}
         {success && (
           <div style={{
@@ -117,7 +114,7 @@ function EmailVerification({ onVerified }) {
             {success}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -126,9 +123,9 @@ function EmailVerification({ onVerified }) {
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             maxLength={6}
             required
-            style={{ 
-              textAlign: 'center', 
-              fontSize: '24px', 
+            style={{
+              textAlign: 'center',
+              fontSize: '24px',
               letterSpacing: '8px',
               fontFamily: 'monospace'
             }}
@@ -137,7 +134,7 @@ function EmailVerification({ onVerified }) {
             {loading ? 'Баталгаажуулж байна...' : 'Баталгаажуулах'}
           </button>
         </form>
-        
+
         <p style={{ textAlign: 'center', marginTop: '20px', color: '#888', fontSize: '14px' }}>
           Код хүлээн аваагүй юу?{' '}
           <button
@@ -156,7 +153,7 @@ function EmailVerification({ onVerified }) {
             Дахин илгээх
           </button>
         </p>
-        
+
         <p style={{ textAlign: 'center', marginTop: '16px' }}>
           <button
             onClick={() => navigate('/login')}

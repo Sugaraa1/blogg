@@ -12,7 +12,6 @@ function Statistics({ currentUser }) {
   const [trendingUsers, setTrendingUsers] = useState([]);
   const [popularPosts, setPopularPosts] = useState([]);
 
-  // ✅ useCallback - dependency warning арилгах
   const fetchTrendingUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -24,9 +23,11 @@ function Statistics({ currentUser }) {
         );
         setTrendingUsers(response.data);
       } catch {
-        const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/search?q=&limit=100', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        // ✅ Засав: comma нэмж, object literal зөв болгов
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/search?q=&limit=100`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         let users = response.data.filter(u => u._id !== currentUser.id);
         users.sort((a, b) => (b.followers?.length || 0) - (a.followers?.length || 0));
         setTrendingUsers(users.slice(0, 10));
@@ -48,10 +49,12 @@ function Statistics({ currentUser }) {
         );
         setPopularPosts(response.data);
       } catch {
-        const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts');
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        );
         let posts = response.data;
 
-        // ✅ filterDate - зөвхөн энд ашиглах (unused var warning арилгав)
         if (timeFilter !== 'all') {
           const msMap = { '7days': 7, 'month': 30 };
           const days = msMap[timeFilter] || 0;
@@ -80,7 +83,6 @@ function Statistics({ currentUser }) {
     setLoading(false);
   }, [timeFilter]);
 
-  // ✅ dependency array зөв
   useEffect(() => {
     if (!showStatistics) return;
     if (activeTab === 'users') {

@@ -5,6 +5,8 @@ import ChatWindow from './ChatWindow';
 import ChatList from './ChatList';
 import './Chat.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function Chat({ currentUser, onlineUsers = [] }) {
   const socketRef = useRef(null);
   const [showChat, setShowChat] = useState(false);
@@ -16,17 +18,16 @@ function Chat({ currentUser, onlineUsers = [] }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 🆕 Avatar URL helper function
   const getAvatarUrl = (avatar) => {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
-    if (avatar.startsWith('data:image')) return avatar; // Base64
-    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${avatar}`;
+    if (avatar.startsWith('data:image')) return avatar;
+    return `${API_URL}${avatar}`;
   };
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}');
+      socketRef.current = io(API_URL);
     }
     const socket = socketRef.current;
 
@@ -40,7 +41,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
           try {
             const token = localStorage.getItem('token');
             await axios.put(
-              `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/${data._id}/read`,
+              `${API_URL}/api/messages/${data._id}/read`,
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -83,7 +84,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
   const fetchConversations = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/conversations', {
+      const response = await axios.get(`${API_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setConversations(response.data);
@@ -97,7 +98,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/search?q=', {
+      const response = await axios.get(`${API_URL}/api/users/search?q=`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const filtered = response.data.filter(u => u._id !== currentUser.id);
@@ -146,8 +147,8 @@ function Chat({ currentUser, onlineUsers = [] }) {
             <h3>Мессеж</h3>
             <div className="chat-header-buttons">
               {!selectedUser && (
-                <button 
-                  className="new-message-btn" 
+                <button
+                  className="new-message-btn"
                   onClick={() => {
                     setShowNewMessage(true);
                     fetchAllUsers();
@@ -162,7 +163,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
           </div>
 
           {!selectedUser ? (
-            <ChatList 
+            <ChatList
               conversations={conversations}
               onSelectUser={handleSelectUser}
               onlineUsers={onlineUsers}
@@ -183,14 +184,14 @@ function Chat({ currentUser, onlineUsers = [] }) {
               <div className="new-message-content">
                 <div className="new-message-header">
                   <h4>Шинэ мессеж</h4>
-                  <button 
-                    className="close-btn" 
+                  <button
+                    className="close-btn"
                     onClick={() => setShowNewMessage(false)}
                   >
                     ✕
                   </button>
                 </div>
-                
+
                 <input
                   type="text"
                   placeholder="Хэрэглэгч хайх..."
@@ -198,22 +199,21 @@ function Chat({ currentUser, onlineUsers = [] }) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                
+
                 <div className="user-list">
                   {allUsers
-                    .filter(u => 
+                    .filter(u =>
                       u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
                       u.displayName.toLowerCase().includes(searchQuery.toLowerCase())
                     )
                     .map(user => (
-                      <div 
-                        key={user._id} 
+                      <div
+                        key={user._id}
                         className="user-item"
                         onClick={() => handleStartNewMessage(user)}
                       >
-                        {/* 🆕 ЗАСВАРЛАСАН Avatar */}
                         {getAvatarUrl(user.avatar) ? (
-                          <img 
+                          <img
                             src={getAvatarUrl(user.avatar)}
                             alt={user.username}
                             className="user-avatar"
@@ -238,7 +238,7 @@ function Chat({ currentUser, onlineUsers = [] }) {
                       </div>
                     ))
                   }
-                  {allUsers.filter(u => 
+                  {allUsers.filter(u =>
                     u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     u.displayName.toLowerCase().includes(searchQuery.toLowerCase())
                   ).length === 0 && (

@@ -164,7 +164,7 @@ function Profile({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile',
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile`,
         { bio: editData.bio },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -213,7 +213,7 @@ function Profile({ user, onLogout, updateUser }) {
           : { coverImage: base64String };
         
         const response = await axios.put(
-          '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile',
+          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile`,
           updateData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -261,7 +261,7 @@ function Profile({ user, onLogout, updateUser }) {
         : { coverImage: imageUrl };
       
       const response = await axios.put(
-        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile',
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/profile`,
         updateData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -15,7 +15,7 @@ function Explore({ user, onLogout, updateUser }) {
   const fetchBlockedUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${user.username}`, {
+      const response = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBlockedUsers(response.data.blockedUsers || []);
@@ -27,7 +27,7 @@ function Explore({ user, onLogout, updateUser }) {
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/search?q=&limit=100', {
+      const response = await axios.get('http://localhost:5000/api/users/search?q=&limit=100', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -59,7 +59,7 @@ function Explore({ user, onLogout, updateUser }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${userId}/follow`,
+        `http://localhost:5000/api/users/${userId}/follow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -86,7 +86,7 @@ function Explore({ user, onLogout, updateUser }) {
       );
       
       if (updateUser) {
-        const updatedUser = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/${user.username}`, {
+        const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         updateUser({

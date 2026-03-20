@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import './CreatePost.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function CreatePost({ user, onPostCreated }) {
   const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -33,7 +35,7 @@ function CreatePost({ user, onPostCreated }) {
       if (imageFile) formData.append('image', imageFile);
 
       const response = await axios.post(
-        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/posts',
+        `${API_URL}/api/posts`,
         formData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
       );
@@ -41,8 +43,7 @@ function CreatePost({ user, onPostCreated }) {
       onPostCreated(response.data);
       setContent('');
       setImageFile(null);
-      
-      // Focus back to textarea
+
       if (textareaRef.current) {
         textareaRef.current.focus();
       }
@@ -68,7 +69,6 @@ function CreatePost({ user, onPostCreated }) {
     setImageFile(null);
   };
 
-  // Character count styling
   const getCharCountClass = () => {
     if (content.length >= 280) return 'danger';
     if (content.length >= 260) return 'warning';
@@ -117,10 +117,10 @@ function CreatePost({ user, onPostCreated }) {
               />
 
               <div className="left-actions">
-                <button 
-                  type="button" 
-                  className="file-icon-btn" 
-                  onClick={triggerFilePicker} 
+                <button
+                  type="button"
+                  className="file-icon-btn"
+                  onClick={triggerFilePicker}
                   title="Зураг сонгох"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -138,9 +138,9 @@ function CreatePost({ user, onPostCreated }) {
                 <span className={`char-count ${getCharCountClass()}`}>
                   {content.length}/280
                 </span>
-                <button 
-                  type="submit" 
-                  disabled={(!content.trim() && !imageFile) || posting || content.length > 280} 
+                <button
+                  type="submit"
+                  disabled={(!content.trim() && !imageFile) || posting || content.length > 280}
                   className="submit-btn"
                 >
                   {posting ? 'Илгээж байна...' : 'Пост'}

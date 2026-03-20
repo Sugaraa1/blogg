@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './Chat.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMessagesUpdate }) {
-  // ✅ Avatar URL helper - BASE64 болон http link-ийг зөв боловсруулах
   const getAvatarUrl = (avatar) => {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
-    if (avatar.startsWith('data:image')) return avatar; // Base64
-    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${avatar}`;
+    if (avatar.startsWith('data:image')) return avatar;
+    return `${API_URL}${avatar}`;
   };
 
   const [messages, setMessages] = useState([]);
@@ -33,17 +34,16 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/${selectedUser.id}`,
+        `${API_URL}/api/messages/${selectedUser.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessages(response.data);
       setLoading(false);
 
-      // Mark messages as read and update conversation list
       const unreadMessages = response.data.filter(
         msg => msg.receiver._id === currentUser.id && !msg.read
       );
-      
+
       if (unreadMessages.length > 0) {
         unreadMessages.forEach(msg => {
           markAsRead(msg._id);
@@ -59,7 +59,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages/${messageId}/read`,
+        `${API_URL}/api/messages/${messageId}/read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -109,13 +109,12 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
       const token = localStorage.getItem('token');
       let imageUrl = null;
 
-      // Upload image if selected
       if (image) {
         const formData = new FormData();
         formData.append('file', image);
 
         const uploadResponse = await axios.post(
-          '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/upload',
+          `${API_URL}/api/upload`,
           formData,
           { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
         );
@@ -123,7 +122,7 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
       }
 
       const response = await axios.post(
-        '${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/messages',
+        `${API_URL}/api/messages`,
         {
           receiver: selectedUser.id,
           content: messageInput.trim(),
@@ -132,7 +131,6 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Send via socket to recipient
       if (socket) {
         socket.emit('send_message', {
           ...response.data,
@@ -146,7 +144,6 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
       setImagePreview(null);
       onMessagesUpdate();
 
-      // Stop typing indicator
       if (socket) {
         socket.emit('stop_typing', {
           sender: currentUser.id,
@@ -172,11 +169,10 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
     <div className="chat-window">
       <div className="chat-window-header">
         <button className="back-btn" onClick={onBack}>←</button>
-        {/* ✅ ЗАСВАРЛАСАН - Avatar харуулах */}
         <div className="header-avatar">
           {getAvatarUrl(selectedUser.avatar) ? (
-            <img 
-              src={getAvatarUrl(selectedUser.avatar)} 
+            <img
+              src={getAvatarUrl(selectedUser.avatar)}
               alt={selectedUser.username}
             />
           ) : (
@@ -213,7 +209,6 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
               key={msg._id}
               className={`message ${msg.sender._id === currentUser.id ? 'sent' : 'received'}`}
             >
-              {/* ✅ ЗАСВАРЛАСАН - Received message avatar */}
               {msg.sender._id !== currentUser.id && (
                 getAvatarUrl(msg.sender.avatar) ? (
                   <img
@@ -235,15 +230,18 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
                   </div>
                 )
               )}
-              
+
               <div className="message-content">
                 {msg.image && (
-                  <img src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${msg.image}`} alt="Message" className="message-image" />
+                  <img
+                    src={`${API_URL}${msg.image}`}
+                    alt="Message"
+                    className="message-image"
+                  />
                 )}
                 {msg.content && <p>{msg.content}</p>}
               </div>
-              
-              {/* ✅ ЗАСВАРЛАСАН - Sent message avatar */}
+
               {msg.sender._id === currentUser.id && (
                 getAvatarUrl(currentUser.avatar) ? (
                   <img

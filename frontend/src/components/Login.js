@@ -16,7 +16,7 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-      const response = await axios.post('${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/login', formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/login`, formData);
       onLogin(response.data.user, response.data.token);
     } catch (err) {
       // И-мэйл баталгаажаагүй бол verification page руу шилжүүлэх
