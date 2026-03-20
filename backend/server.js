@@ -7,12 +7,14 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: ["http://localhost:3000", process.env.FRONTEND_URL].filter(Boolean),
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   }
 });
 
@@ -22,8 +24,14 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.use('/api/statistics', require('./routes/statistics'));
-app.use(cors());
+// ✅ CORS middleware - бүх routes-аас ӨМНӨ байх ёстой
+app.use(cors({
+  origin: ["http://localhost:3000", process.env.FRONTEND_URL].filter(Boolean),
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -44,7 +52,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/api/reports', require('./routes/reports'));
-app.use('/api/statistics', require('./routes/statistics')); // ✅ НЭМСЭН
+app.use('/api/statistics', require('./routes/statistics'));
 
 const auth = require('./middleware/auth');
 app.post('/api/upload', auth, upload.single('file'), (req, res) => {
