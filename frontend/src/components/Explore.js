@@ -1,82 +1,72 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import './Explore.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function Explore({ user, onLogout, updateUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingMap, setFollowingMap] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [blockedUsers, setBlockedUsers] = useState([]); // 🆕 Blocked users
+  const [blockedUsers, setBlockedUsers] = useState([]);
 
-  // 🆕 Blocked users авах
-  const fetchBlockedUsers = async () => {
+  const fetchBlockedUsers = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
+      const response = await axios.get(`${API_URL}/api/users/${user.username}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBlockedUsers(response.data.blockedUsers || []);
     } catch (error) {
       console.error('Blocked users авахад алдаа:', error);
     }
-  };
+  }, [user.username]);
 
-  const fetchAllUsers = async () => {
+  const fetchAllUsers = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/search?q=&limit=100', {
+      const response = await axios.get(`${API_URL}/api/users/search?q=&limit=100`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
-      
       const map = {};
       const currentUserFollowing = user.following || [];
-      
       response.data.forEach(u => {
-        const isFollowing = currentUserFollowing.some(f => 
-          String(f._id || f) === String(u._id)
-        );
+        const isFollowing = currentUserFollowing.some(f => String(f._id || f) === String(u._id));
         map[u._id] = isFollowing;
       });
-      
       setFollowingMap(map);
       setLoading(false);
     } catch (error) {
       console.log('Users авах алдаа:', error);
       setLoading(false);
     }
-  };
+  }, [user.following]);
 
   useEffect(() => {
     fetchAllUsers();
-    fetchBlockedUsers(); // 🆕 Blocked users авах
-  }, []);
+    fetchBlockedUsers();
+  }, [fetchAllUsers, fetchBlockedUsers]);
 
   const handleFollow = async (userId) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:5000/api/users/${userId}/follow`,
+        `${API_URL}/api/users/${userId}/follow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
       const isNowFollowing = response.data.isFollowing;
-      
-      setFollowingMap(prev => ({
-        ...prev,
-        [userId]: isNowFollowing
-      }));
-      
-      setUsers(prevUsers => 
+      setFollowingMap(prev => ({ ...prev, [userId]: isNowFollowing }));
+      setUsers(prevUsers =>
         prevUsers.map(u => {
           if (u._id === userId) {
             return {
               ...u,
-              followers: isNowFollowing 
+              followers: isNowFollowing
                 ? [...(u.followers || []), { _id: user.id }]
                 : (u.followers || []).filter(f => String(f._id || f) !== String(user.id))
             };
@@ -84,16 +74,11 @@ function Explore({ user, onLogout, updateUser }) {
           return u;
         })
       );
-      
       if (updateUser) {
-        const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.username}`, {
+        const updatedUser = await axios.get(`${API_URL}/api/users/${user.username}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        updateUser({
-          ...user,
-          following: updatedUser.data.following,
-          followers: updatedUser.data.followers
-        });
+        updateUser({ ...user, following: updatedUser.data.following, followers: updatedUser.data.followers });
       }
     } catch (error) {
       console.error('Follow хийхэд алдаа:', error);
@@ -101,34 +86,21 @@ function Explore({ user, onLogout, updateUser }) {
     }
   };
 
-  // ✅ ЗАСВАРЛАСАН: Өөрийгөө болон blocked users-ийг хасах
   const filteredUsers = users.filter(u => {
-    // Өөрийгөө хасах
     if (u._id === user.id) return false;
-    
-    // 🆕 Blocked users хасах
-    const isBlocked = blockedUsers.some(blockedId => 
-      String(blockedId._id || blockedId) === String(u._id)
-    );
+    const isBlocked = blockedUsers.some(blockedId => String(blockedId._id || blockedId) === String(u._id));
     if (isBlocked) return false;
-    
-    // Search query шүүлт
-    const matchesSearch = 
+    return (
       u.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.username.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesSearch;
+      u.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   });
 
   return (
     <div className="home-layout">
       <Sidebar user={user} onLogout={onLogout} />
-      
       <div className="main-content">
-        <div className="content-header">
-          <h2>Олж танилцах</h2>
-        </div>
-        
+        <div className="content-header"><h2>Олж танилцах</h2></div>
         <div className="explore-search-bar">
           <input
             type="text"
@@ -138,34 +110,19 @@ function Explore({ user, onLogout, updateUser }) {
             className="search-input"
           />
         </div>
-        
         {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Уншиж байна...</p>
-          </div>
+          <div className="loading-state"><div className="spinner"></div><p>Уншиж байна...</p></div>
         ) : (
           <div className="explore-container">
             <div className="explore-section">
               <h3>{searchQuery ? 'Хайлтын үр дүн' : 'Бүх хэрэглэгчид'}</h3>
-              
               {filteredUsers.length === 0 ? (
-                <div className="empty-state">
-                  <p>
-                    {searchQuery 
-                      ? 'Хэрэглэгч олдсонгүй' 
-                      : 'Хэрэглэгч байхгүй байна'
-                    }
-                  </p>
-                </div>
+                <div className="empty-state"><p>{searchQuery ? 'Хэрэглэгч олдсонгүй' : 'Хэрэглэгч байхгүй байна'}</p></div>
               ) : (
                 <div className="users-grid">
                   {filteredUsers.map(u => (
                     <div key={u._id} className="user-card">
-                      <Link 
-                        to={`/profile/${u.username}`}
-                        className="user-card-link"
-                      >
+                      <Link to={`/profile/${u.username}`} className="user-card-link">
                         <div className="user-card-avatar">
                           {u.avatar && u.avatar.trim() !== '' ? (
                             <img src={u.avatar} alt={u.displayName} />
@@ -184,7 +141,6 @@ function Explore({ user, onLogout, updateUser }) {
                           </p>
                         </div>
                       </Link>
-                      
                       <button
                         className={`follow-btn ${followingMap[u._id] ? 'following' : ''}`}
                         onClick={() => handleFollow(u._id)}
