@@ -1,9 +1,6 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 
-// IPv4 forced — Render.com IPv6 дэмждэггүй
-dns.setDefaultResultOrder('ipv4first');
-
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
@@ -15,9 +12,8 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  // IPv4 тодорхой зааж өгөх
-  socketOptions: {
-    family: 4
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { ...options, family: 4 }, callback);
   }
 });
 
