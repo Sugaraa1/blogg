@@ -119,46 +119,45 @@ function Home({ user, onLogout }) {
               </div>
             ) : (
               filteredPosts.map(post => (
-                <Post key={post._id} post={post} currentUser={user} onPostUpdate={handlePostUpdate} />
+                <Post
+                  key={post._id}
+                  post={post}
+                  currentUser={user}
+                  onPostUpdate={handlePostUpdate}
+                />
               ))
             )}
           </div>
         )}
       </div>
 
-      {/* Desktop right sidebar */}
+      {/* Desktop: баруун sidebar */}
       <div className="right-sidebar" id="create-post-section">
         <div className="composer-widget">
           <CreatePost user={user} onPostCreated={handleNewPost} />
         </div>
       </div>
 
-      {/* Mobile: floating create button */}
+      {/* Mobile: + товч */}
       <button
         className="mobile-create-btn"
         onClick={() => setShowMobileComposer(true)}
+        aria-label="Пост бичих"
       >
-        +
+        ✏️
       </button>
 
       {/* Mobile: create post modal */}
       {showMobileComposer && (
         <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 300,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'flex-end'
-          }}
+          className="mobile-composer-overlay"
           onClick={() => setShowMobileComposer(false)}
         >
           <div
-            style={{
-              width: '100%', background: 'var(--bg-secondary)',
-              borderRadius: '20px 20px 0 0', padding: '20px 16px 32px',
-              border: '1px solid var(--border-color)'
-            }}
+            className="mobile-composer-sheet"
             onClick={e => e.stopPropagation()}
           >
+            <div className="mobile-composer-handle" />
             <CreatePost user={user} onPostCreated={handleNewPost} />
           </div>
         </div>

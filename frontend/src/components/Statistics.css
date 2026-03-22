@@ -434,9 +434,10 @@
 
 @media (max-width: 768px) {
   .statistics-container {
-    bottom: 120px;
-    right: 12px;
-    z-index: 290;
+    bottom: 68px;
+    left: 12px;
+    right: auto;
+    z-index: 300;
   }
 
   .statistics-toggle-btn {
@@ -447,8 +448,9 @@
 
   .statistics-modal {
     width: calc(100vw - 24px);
-    right: 12px;
-    bottom: 174px;
+    left: 0;
+    right: auto;
+    bottom: 122px;
     max-height: 55vh;
   }
 }
