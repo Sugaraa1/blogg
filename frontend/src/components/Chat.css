@@ -9,6 +9,24 @@
   z-index: 900;
 }
 
+@media (max-width: 768px) {
+  .chat-container {
+    bottom: 70px;
+    right: 12px;
+  }
+
+  .chat-window-wrapper {
+    width: 100vw;
+    height: calc(100vh - 60px);
+    height: calc(100dvh - 60px);
+    max-height: none;
+    bottom: 60px !important;
+    right: 0 !important;
+    border-radius: 0;
+    border-bottom: none;
+  }
+}
+
 /* Toggle Button */
 .chat-toggle-btn {
   width: 52px;

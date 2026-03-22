@@ -433,6 +433,21 @@
 .statistics-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 
 @media (max-width: 768px) {
-  .statistics-container { bottom: 88px; right: 14px; }
-  .statistics-modal { width: calc(100vw - 28px); right: 14px; bottom: 152px; max-height: calc(100vh - 200px); }
+  .statistics-container {
+    bottom: 78px;
+    right: 12px;
+  }
+
+  .statistics-toggle-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .statistics-modal {
+    width: calc(100vw - 24px);
+    right: 12px;
+    bottom: 132px;
+    max-height: calc(100vh - 180px);
+  }
 }
