@@ -15,25 +15,27 @@ function Register() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/register`, formData);
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/register`,
+      formData
+    );
       
-      // Verification page руу шилжүүлэх
-      navigate('/verify-email', { 
-        state: { 
-          email: formData.email,
-          message: response.data.message 
-        } 
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Бүртгэл үүсгэхэд алдаа гарлаа');
-      setLoading(false);
+     if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      navigate('/');
+      window.location.reload();
     }
-  };
+  } catch (err) {
+    setError(err.response?.data?.message || 'Бүртгэл үүсгэхэд алдаа гарлаа');
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-container">
