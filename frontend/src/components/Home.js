@@ -54,13 +54,14 @@ function Home({ user, onLogout }) {
     setShowMobileComposer(false);
   };
 
-  const handlePostUpdate = (updatedPost) => {
-    if (updatedPost === null) {
-      fetchPosts();
-    } else {
-      setPosts(prev => prev.map(p => p._id === updatedPost._id ? updatedPost : p));
-    }
-  };
+  const handlePostUpdate = useCallback((updatedPost) => {
+  if (updatedPost === null) {
+    // Устгасан постыг шууд state-ээс хасна — дахин fetch хийхгүй
+    fetchPosts();
+  } else {
+    setPosts(prev => prev.map(p => p._id === updatedPost._id ? updatedPost : p));
+  }
+}, [fetchPosts]);
 
   const getFilteredPosts = () => {
     let filtered = posts;
