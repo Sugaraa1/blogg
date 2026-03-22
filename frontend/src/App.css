@@ -1,11 +1,5 @@
-/* ==========================================
-   Э-БЛОГ — DEEP SPACE DARK THEME
-   Clean, Minimal, Premium Dark UI
-   ========================================== */
-
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* ── CSS Variables ── */
 :root[data-theme="dark"] {
   --bg-primary:      #080b12;
   --bg-secondary:    #0d1117;
@@ -13,31 +7,24 @@
   --bg-card:         #111827;
   --bg-hover:        rgba(99, 179, 237, 0.06);
   --bg-input:        #0d1117;
-
   --text-primary:    #e2e8f0;
   --text-secondary:  #64748b;
   --text-muted:      #374151;
-
   --border-color:    rgba(99, 179, 237, 0.08);
   --border-subtle:   rgba(255,255,255,0.04);
-
   --accent-color:    #63b3ed;
   --accent-hover:    #90cdf4;
   --accent-dim:      rgba(99, 179, 237, 0.12);
   --accent-gradient: linear-gradient(135deg, #63b3ed 0%, #9f7aea 100%);
-
   --like-color:      #f87171;
   --retweet-color:   #34d399;
   --success-color:   #34d399;
   --warning-color:   #fbbf24;
   --error-color:     #f87171;
-
   --shadow-sm:  0 1px 8px rgba(0,0,0,0.4);
   --shadow-md:  0 4px 24px rgba(0,0,0,0.5);
   --shadow-lg:  0 8px 48px rgba(0,0,0,0.6);
-
   --glow-accent: 0 0 20px rgba(99, 179, 237, 0.15);
-
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -52,31 +39,24 @@
   --bg-card:         #ffffff;
   --bg-hover:        rgba(99, 179, 237, 0.06);
   --bg-input:        #f8fafc;
-
   --text-primary:    #0f172a;
   --text-secondary:  #64748b;
   --text-muted:      #94a3b8;
-
   --border-color:    #e2e8f0;
   --border-subtle:   #f1f5f9;
-
   --accent-color:    #3b82f6;
   --accent-hover:    #2563eb;
   --accent-dim:      rgba(59, 130, 246, 0.08);
   --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-
   --like-color:      #ef4444;
   --retweet-color:   #10b981;
   --success-color:   #10b981;
   --warning-color:   #f59e0b;
   --error-color:     #ef4444;
-
   --shadow-sm:  0 1px 4px rgba(0,0,0,0.06);
   --shadow-md:  0 4px 16px rgba(0,0,0,0.08);
   --shadow-lg:  0 8px 32px rgba(0,0,0,0.1);
-
   --glow-accent: 0 0 20px rgba(59, 130, 246, 0.1);
-
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -84,7 +64,6 @@
   --radius-full: 9999px;
 }
 
-/* ── Reset & Base ── */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -105,29 +84,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.25s ease, color 0.25s ease;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* ── Dark mode subtle grid background ── */
-[data-theme="dark"] body {
-  background-image:
-    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99,179,237,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(159,122,234,0.04) 0%, transparent 60%);
-  background-attachment: fixed;
-}
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
-/* ── App Container ── */
 .App {
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-primary);
 }
 
-/* ── Animations ── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -139,37 +108,7 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
 
-/* ── Utility ── */
-.gradient-text {
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--border-color);
-  border-top-color: var(--accent-color);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-/* ── Button Base ── */
 button {
   font-family: 'Sora', sans-serif;
   cursor: pointer;
@@ -178,28 +117,13 @@ button {
   transition: all 0.2s ease;
 }
 
-button:focus-visible {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
-/* ── Input Base ── */
 input, textarea, select {
   font-family: 'Sora', sans-serif;
 }
 
-/* ── Link Base ── */
 a {
   color: var(--accent-color);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 a:hover { color: var(--accent-hover); }
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  body { font-size: 14px; }
-}
-@media (max-width: 480px) {
-  body { font-size: 13px; }
-}

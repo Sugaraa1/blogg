@@ -520,3 +520,40 @@
 .reply-username { font-size: 11px; color: var(--text-secondary); margin-left: 4px; }
 .reply-content p { font-size: 13px; color: var(--text-primary); margin: 3px 0; line-height: 1.5; }
 .reply-time { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+@media (max-width: 768px) {
+  .post {
+    padding: 12px 14px;
+  }
+
+  .post-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .post-content p {
+    font-size: 14px;
+  }
+
+  .action-btn {
+    padding: 6px 8px;
+    min-width: 40px;
+    font-size: 12px;
+  }
+
+  .action-icon { font-size: 14px; }
+
+  .post-actions { gap: 2px; }
+
+  .viewers-content {
+    width: 95%;
+    max-height: 80vh;
+  }
+
+  .comments-section { margin-top: 10px; padding-top: 10px; }
+
+  .comment-form input { font-size: 14px; padding: 8px 12px; }
+
+  .reply-form input { font-size: 13px; }
+}
