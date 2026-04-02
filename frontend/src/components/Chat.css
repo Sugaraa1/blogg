@@ -14,17 +14,6 @@
     bottom: 70px;
     right: 12px;
   }
-
-  .chat-window-wrapper {
-    width: 100vw;
-    height: calc(100vh - 60px);
-    height: calc(100dvh - 60px);
-    max-height: none;
-    bottom: 60px !important;
-    right: 0 !important;
-    border-radius: 0;
-    border-bottom: none;
-  }
 }
 
 /* Toggle Button */
@@ -75,7 +64,7 @@
   bottom: 84px;
   right: 20px;
   width: 340px;
-  max-height: 560px;
+  height: 520px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -96,16 +85,23 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Chat Header (Мессеж / буцах) ── */
 .chat-header {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0;
+  flex-shrink: 0;        /* ← огт агшихгүй */
+  min-height: 52px;
+  background: var(--bg-card);
+  z-index: 1;
 }
 
-[data-theme="dark"] .chat-header { border-color: rgba(99,179,237,0.07); }
+[data-theme="dark"] .chat-header {
+  background: #111827;
+  border-color: rgba(99,179,237,0.07);
+}
 
 .chat-header h3 {
   margin: 0;
@@ -186,7 +182,6 @@
 }
 
 [data-theme="dark"] .new-message-header { border-color: rgba(99,179,237,0.07); }
-
 .new-message-header h4 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); }
 
 .user-search-input {
@@ -318,29 +313,46 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Chat Window */
-.chat-window { display: flex; flex-direction: column; height: 100%; }
+/* ══════════════════════════════
+   CHAT WINDOW (дотоод харилцан яриа)
+══════════════════════════════ */
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;        /* wrapper-ийн бүтэн өндрийг авна */
+  min-height: 0;       /* flex child overflow засна */
+  overflow: hidden;
+}
 
+/* ── Window Header (← буцах товч) ── */
 .chat-window-header {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;      /* ← огт агшихгүй, үргэлж харагдана */
+  min-height: 56px;
+  background: var(--bg-card);
+  z-index: 1;
 }
 
-[data-theme="dark"] .chat-window-header { border-color: rgba(99,179,237,0.07); }
+[data-theme="dark"] .chat-window-header {
+  background: #111827;
+  border-color: rgba(99,179,237,0.07);
+}
 
 .back-btn {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--accent-color);
-  padding: 4px 6px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
   transition: background 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
 }
 .back-btn:hover { background: var(--accent-dim); }
 
@@ -353,10 +365,24 @@
 }
 .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.chat-window-info h4 { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-primary); }
-.chat-handle { display: block; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+.chat-window-info { flex: 1; min-width: 0; }
+.chat-window-info h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-handle {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
 
-/* Messages */
+/* ── Messages area ── */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -364,6 +390,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 0;       /* ← overflow scroll ажиллахын тулд заавал хэрэгтэй */
 }
 
 .no-messages {
@@ -375,7 +402,13 @@
   font-size: 14px;
 }
 
-.loading { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); }
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+}
 
 .message {
   display: flex;
@@ -416,7 +449,10 @@
   border: 1px solid var(--border-color);
 }
 
-[data-theme="dark"] .message-content p { background: #1e2433; border-color: rgba(99,179,237,0.08); }
+[data-theme="dark"] .message-content p {
+  background: #1e2433;
+  border-color: rgba(99,179,237,0.08);
+}
 
 .message.sent .message-content p {
   background: var(--accent-color);
@@ -451,7 +487,7 @@
   30%           { opacity: 1; transform: translateY(-5px); }
 }
 
-/* Input Form */
+/* ── Input Form ── */
 .chat-input-form {
   padding: 10px 12px;
   border-top: 1px solid var(--border-color);
@@ -536,7 +572,7 @@
   flex-shrink: 0;
 }
 .send-btn:hover { opacity: 0.85; transform: scale(1.05); }
-.send-btn:disabled { background: var(--border-color); cursor: not-allowed; transform: none; }
+.send-btn:disabled { background: var(--border-color); cursor: not-allowed; transform: none; opacity: 0.5; }
 
 /* Scrollbars */
 .chat-list::-webkit-scrollbar,
@@ -546,17 +582,7 @@
 .chat-list::-webkit-scrollbar-thumb,
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 
-@media (max-width: 480px) {
-  .chat-window-wrapper {
-    width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
-    bottom: 0 !important;
-    right: 0 !important;
-    border-radius: 0;
-  }
-}
-
+/* ── Mobile ── */
 @media (max-width: 768px) {
   .chat-container {
     bottom: 68px;
@@ -568,7 +594,6 @@
     width: 44px;
     height: 44px;
     font-size: 18px;
-    box-shadow: 0 2px 12px rgba(99,179,237,0.3);
   }
 
   .chat-window-wrapper {
@@ -583,5 +608,12 @@
     border-bottom: none;
     border-left: none;
     border-right: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-window-wrapper {
+    height: 75vh;
+    max-height: 75vh;
   }
 }
