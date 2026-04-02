@@ -42,8 +42,13 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
       );
       setMessages(response.data);
       setLoading(false);
+
+      // Unread мессежүүдийг уншсан болгох
       const unreadMessages = response.data.filter(
-        msg => msg.receiver._id === currentUser.id && !msg.read
+        msg => {
+          const receiverId = msg.receiver?._id || msg.receiver;
+          return String(receiverId) === String(currentUser.id) && !msg.read;
+        }
       );
       if (unreadMessages.length > 0) {
         unreadMessages.forEach(msg => markAsRead(msg._id));
@@ -55,6 +60,8 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
   }, [selectedUser.id, currentUser.id, markAsRead]);
 
   useEffect(() => {
+    setMessages([]);
+    setLoading(true);
     fetchMessages();
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
@@ -87,9 +94,11 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!messageInput.trim() && !image) return;
+
     try {
       const token = localStorage.getItem('token');
       let imageUrl = null;
+
       if (image) {
         const formData = new FormData();
         formData.append('file', image);
@@ -100,37 +109,76 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
         );
         imageUrl = uploadResponse.data.path;
       }
+
       const response = await axios.post(
         `${API_URL}/api/messages`,
         { receiver: selectedUser.id, content: messageInput.trim(), image: imageUrl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (socket) socket.emit('send_message', { ...response.data, _id: response.data._id });
+
+      if (socket) {
+        socket.emit('send_message', { ...response.data, _id: response.data._id });
+      }
+
       setMessages(prev => [...prev, response.data]);
       setMessageInput('');
       setImage(null);
       setImagePreview(null);
       onMessagesUpdate();
-      if (socket) socket.emit('stop_typing', { sender: currentUser.id, receiver: selectedUser.id });
+
+      if (socket) {
+        socket.emit('stop_typing', { sender: currentUser.id, receiver: selectedUser.id });
+      }
     } catch (error) {
       const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to send message';
       alert(`Мессеж илгээхэд алдаа: ${errorMsg}`);
     }
   };
 
+  // Мессежийн sender ID-г normalize хийх
+  const getSenderId = (msg) => {
+    if (msg.sender && typeof msg.sender === 'object') return String(msg.sender._id);
+    return String(msg.sender);
+  };
+
+  const isSentByMe = (msg) => getSenderId(msg) === String(currentUser.id);
+
   if (loading) {
-    return <div className="chat-messages"><div className="loading">Ачаалж байна...</div></div>;
+    return (
+      <div className="chat-window">
+        <div className="chat-window-header">
+          <button className="back-btn" onClick={onBack}>←</button>
+          <div className="header-avatar">
+            {getAvatarUrl(selectedUser.avatar) ? (
+              <img src={getAvatarUrl(selectedUser.avatar)} alt={selectedUser.username} />
+            ) : (
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '16px' }}>
+                {selectedUser.displayName?.charAt(0).toUpperCase() || 'U'}
+              </div>
+            )}
+          </div>
+          <div className="chat-window-info">
+            <h4>{selectedUser.displayName || selectedUser.username}</h4>
+            <span className="chat-handle">@{selectedUser.username}</span>
+          </div>
+        </div>
+        <div className="chat-messages">
+          <div className="loading">Ачаалж байна...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="chat-window">
+      {/* Header */}
       <div className="chat-window-header">
         <button className="back-btn" onClick={onBack}>←</button>
         <div className="header-avatar">
           {getAvatarUrl(selectedUser.avatar) ? (
             <img src={getAvatarUrl(selectedUser.avatar)} alt={selectedUser.username} />
           ) : (
-            <div style={{ width:'40px',height:'40px',borderRadius:'50%',background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'bold',fontSize:'16px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '16px' }}>
               {selectedUser.displayName?.charAt(0).toUpperCase() || 'U'}
             </div>
           )}
@@ -141,41 +189,72 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
         </div>
       </div>
 
+      {/* Messages */}
       <div className="chat-messages">
         {messages.length === 0 ? (
           <div className="no-messages"><p>Хэлэлцээ эхлүүлэх</p></div>
         ) : (
-          messages.map(msg => (
-            <div key={msg._id} className={`message ${msg.sender._id === currentUser.id ? 'sent' : 'received'}`}>
-              {msg.sender._id !== currentUser.id && (
-                getAvatarUrl(msg.sender.avatar) ? (
-                  <img src={getAvatarUrl(msg.sender.avatar)} alt={msg.sender.username} className="message-avatar" />
-                ) : (
-                  <div className="message-avatar" style={{ background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'bold',fontSize:'14px' }}>
-                    {msg.sender.displayName?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                )
-              )}
-              <div className="message-content">
-                {msg.image && <img src={`${API_URL}${msg.image}`} alt="Message" className="message-image" />}
-                {msg.content && <p>{msg.content}</p>}
+          messages.map(msg => {
+            const sent = isSentByMe(msg);
+            const senderObj = typeof msg.sender === 'object' ? msg.sender : null;
+            const senderAvatar = sent
+              ? getAvatarUrl(currentUser.avatar)
+              : getAvatarUrl(senderObj?.avatar);
+            const senderInitial = sent
+              ? (currentUser.displayName?.charAt(0).toUpperCase() || 'U')
+              : (senderObj?.displayName?.charAt(0).toUpperCase() || 'U');
+
+            return (
+              <div key={msg._id} className={`message ${sent ? 'sent' : 'received'}`}>
+                {/* Received: зүүн талд avatar */}
+                {!sent && (
+                  senderAvatar ? (
+                    <img src={senderAvatar} alt="avatar" className="message-avatar" />
+                  ) : (
+                    <div className="message-avatar" style={{ background: 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                      {senderInitial}
+                    </div>
+                  )
+                )}
+
+                <div className="message-content">
+                  {msg.image && (
+                    <img
+                      src={msg.image.startsWith('http') ? msg.image : `${API_URL}${msg.image}`}
+                      alt="Message"
+                      className="message-image"
+                    />
+                  )}
+                  {msg.content && <p>{msg.content}</p>}
+                </div>
+
+                {/* Sent: баруун талд avatar */}
+                {sent && (
+                  senderAvatar ? (
+                    <img src={senderAvatar} alt="avatar" className="message-avatar" />
+                  ) : (
+                    <div className="message-avatar" style={{ background: 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                      {senderInitial}
+                    </div>
+                  )
+                )}
               </div>
-              {msg.sender._id === currentUser.id && (
-                getAvatarUrl(currentUser.avatar) ? (
-                  <img src={getAvatarUrl(currentUser.avatar)} alt={currentUser.username} className="message-avatar" />
-                ) : (
-                  <div className="message-avatar" style={{ background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'bold',fontSize:'14px' }}>
-                    {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                )
-              )}
-            </div>
-          ))
+            );
+          })
         )}
-        {isTyping && <div className="message typing-indicator"><span>●</span><span>●</span><span>●</span></div>}
+
+        {isTyping && (
+          <div className="message received">
+            <div className="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <form className="chat-input-form" onSubmit={handleSendMessage}>
         {imagePreview && (
           <div className="image-preview">
@@ -186,10 +265,18 @@ function ChatWindow({ selectedUser, currentUser, onBack, socket, isTyping, onMes
         <div className="chat-input-container">
           <label className="image-upload-btn">
             📎
-            <input type="file" accept="image/*" onChange={handleImageSelect} style={{ display:'none' }} />
+            <input type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
           </label>
-          <input type="text" value={messageInput} onChange={(e) => { setMessageInput(e.target.value); handleTyping(); }} placeholder="Мессеж илгээх..." className="chat-input" />
-          <button type="submit" className="send-btn">📤</button>
+          <input
+            type="text"
+            value={messageInput}
+            onChange={(e) => { setMessageInput(e.target.value); handleTyping(); }}
+            placeholder="Мессеж илгээх..."
+            className="chat-input"
+          />
+          <button type="submit" className="send-btn" disabled={!messageInput.trim() && !image}>
+            📤
+          </button>
         </div>
       </form>
     </div>
