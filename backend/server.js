@@ -25,17 +25,26 @@ const io = socketIO(server, {
   }
 });
 // ✅ CORS middleware - бүх routes-аас ӨМНӨ байх ёстой
+// app.use(cors({
+//   origin: [
+//     "http://localhost:3000", 
+//     "https://eblogg.vercel.app",
+//     "https://eblogg-d977qmx02-sugaraa1s-projects.vercel.app",
+//     process.env.FRONTEND_URL
+//   ].filter(Boolean),
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+//   credentials: true
+// }));
 app.use(cors({
-  origin: [
-    "http://localhost:3000", 
-    "https://eblogg.vercel.app",
-    "https://eblogg-d977qmx02-sugaraa1s-projects.vercel.app",
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: function(origin, callback) {
+    callback(null, true);
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
+app.options('*', cors());
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
