@@ -13,50 +13,31 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Зөвшөөрөгдсөн origins - бүгдийг нэмэх
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://eblogg.vercel.app",
-  "https://eblogg-d977qmx02-sugaraa1s-projects.vercel.app",
-  process.env.FRONTEND_URL
-].filter(Boolean);
-
 const corsOptions = {
   origin: function (origin, callback) {
-    // origin байхгүй бол (mobile app, Postman г.м.) зөвшөөрнө
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    if (origin.includes('vercel.app') || origin.includes('localhost')) {
       return callback(null, true);
     }
-    // Vercel preview deployments-ийг бүгдийг зөвшөөрнө
-    if (origin.includes('vercel.app')) {
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       return callback(null, true);
     }
-    callback(new Error('CORS policy violation: ' + origin));
+    callback(null, true); // Бүгдийг зөвшөөрнө
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
-  optionsSuccessStatus: 200 // IE11-д 204 асуудал гардаг тул 200
+  optionsSuccessStatus: 200
 };
 
 // ✅ CORS middleware - бүх routes-аас ӨМНӨ
 app.use(cors(corsOptions));
 
-// ✅ OPTIONS preflight request-ийг explicitly handle хийх
-app.options('*', cors(corsOptions));
-
 const io = socketIO(server, {
   cors: {
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin) || (origin && origin.includes('vercel.app'))) {
-        return callback(null, true);
-      }
-      callback(new Error('CORS policy violation'));
-    },
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: false
   }
 });
 
