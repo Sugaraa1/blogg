@@ -14,15 +14,24 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
-    origin: ["http://localhost:3000", process.env.FRONTEND_URL].filter(Boolean),
+    origin: [
+      "http://localhost:3000",
+      "https://eblogg.vercel.app", 
+      "https://eblogg-d977qmx02-sugaraa1s-projects.vercel.app",
+      process.env.FRONTEND_URL
+    ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   }
 });
-
 // ✅ CORS middleware - бүх routes-аас ӨМНӨ байх ёстой
 app.use(cors({
-  origin: ["http://localhost:3000", process.env.FRONTEND_URL].filter(Boolean),
+  origin: [
+    "http://localhost:3000", 
+    "https://eblogg.vercel.app",
+    "https://eblogg-d977qmx02-sugaraa1s-projects.vercel.app",
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
